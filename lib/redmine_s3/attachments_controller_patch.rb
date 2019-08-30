@@ -70,7 +70,7 @@ module RedmineS3
             if RedmineS3::Connection.proxy?
               send_data s3_raw_data(tbnail),
                 filename: filename_for_content_disposition(@attachment.filename),
-                type: detect_content_type(@attachment, true),
+                type: detect_content_type(@attachment),
                 disposition: 'inline'
             else
               redirect_to(tbnail)

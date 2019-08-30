@@ -25,9 +25,8 @@ module RedmineS3
 
       module ClassMethods
         # Generates a thumbnail for the source image to target
-        def generate(source, target, size, is_pdf = false)
+        def generate(source, target, size)
           return nil unless convert_available?
-          return nil if is_pdf && !gs_available?
 
           target_folder = RedmineS3::Connection.thumb_folder
           object = RedmineS3::Connection.object(target, target_folder)
@@ -41,25 +40,16 @@ module RedmineS3
             mime_type = MimeMagic.by_magic(raw_data).try(:type)
             return nil if mime_type.nil?
             return nil if !Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
-            return nil if is_pdf && mime_type != "application/pdf"
 
             size_option = "#{size}x#{size}>"
             begin
               tempfile = MiniMagick::Utilities.tempfile(File.extname(source)) do |f| f.write(raw_data) end
               convert_output =
-                if is_pdf
-                  MiniMagick::Tool::Convert.new do |cmd|
-                    cmd << "#{tempfile.to_path}[0]"
-                    cmd.thumbnail size_option
-                    cmd << 'png:-'
-                  end
-                else
-                  MiniMagick::Tool::Convert.new do |cmd|
-                    cmd << tempfile.to_path
-                    cmd.auto_orient
-                    cmd.thumbnail size_option
-                    cmd << '-'
-                  end
+                MiniMagick::Tool::Convert.new do |cmd|
+                  cmd << tempfile.to_path
+                  cmd.auto_orient
+                  cmd.thumbnail size_option
+                  cmd << '-'
                 end
               img = MiniMagick::Image.read(convert_output)
 

@@ -98,7 +98,7 @@ module RedmineS3
         size = options[:size].to_i
         if size > 0
           # Limit the number of thumbnails per image
-          size = (size / 50.0).ceil * 50
+          size = (size / 50) * 50
           # Maximum thumbnail size
           size = 800 if size > 800
         else
@@ -109,7 +109,7 @@ module RedmineS3
 
         diskfile_s3  = diskfile
         begin
-          Redmine::Thumbnail.generate(diskfile_s3, target, size, is_pdf?)
+          Redmine::Thumbnail.generate(diskfile_s3, target, size)
         rescue => e
           Rails.logger.error "An error occured while generating thumbnail for #{diskfile_s3} to #{target}\nException was: #{e.message}"
           return
@@ -204,10 +204,6 @@ module RedmineS3
           thumbnail_path('*').sub(/\*\.thumb$/, '')
         )
       end
-
-      def thumbnail_path(size)
-        Pathname.new(super).relative_path_from(Pathname.new(self.class.thumbnails_storage_path)).to_s
-      end
     end
 
   protected
@@ -216,6 +212,14 @@ module RedmineS3
       object = RedmineS3::Connection.object(diskfile)
       object.reload if reload && !object.data_loaded?
       object
+    end
+
+  private
+
+    def thumbnail_path(size)
+      Pathname.new(
+        File.join(self.class.thumbnails_storage_path, "#{id}_#{digest}_#{size}.thumb")
+      ).relative_path_from(Pathname.new(self.class.thumbnails_storage_path)).to_s
     end
 
   end
