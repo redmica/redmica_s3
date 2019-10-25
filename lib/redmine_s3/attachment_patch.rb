@@ -1,46 +1,100 @@
 module RedmineS3
   module AttachmentPatch
-    def self.included(base) # :nodoc:
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
+    extend ActiveSupport::Concern
 
-      # Same as typing in the class
-      base.class_eval do
-        unloadable # Send unloadable so it will not be unloaded in development
-        attr_accessor :s3_access_key_id, :s3_secret_acces_key, :s3_bucket, :s3_bucket
-        after_validation :put_to_s3
-        after_create      :generate_thumbnail_s3
-        before_destroy   :delete_from_s3
-      end
+    included do
+      prepend PrependMethods
     end
 
-    module ClassMethods
+    class_methods do
     end
 
-    module InstanceMethods
-      def put_to_s3
-        if @temp_file && (@temp_file.size > 0) && errors.blank?
-          self.disk_directory = disk_directory || target_directory
-          self.disk_filename  = Attachment.disk_filename(filename, disk_directory) if disk_filename.blank?
-          logger.debug("Uploading to #{disk_filename}")
-          RedmineS3::Connection.put(disk_filename_s3, filename, @temp_file, self.content_type)
-          self.digest = Time.now.to_i.to_s
+    module PrependMethods
+      def self.prepended(base)
+        class << base
+          self.prepend(ClassMethods)
         end
-        @temp_file = nil # so that the model's original after_save block skips writing to the fs
       end
 
-      def delete_from_s3
-        logger.debug("Deleting #{disk_filename_s3}")
-        RedmineS3::Connection.delete(disk_filename_s3)
+      module ClassMethods
+        # Returns an ASCII or hashed filename that do not
+        # exists yet in the given subdirectory
+        def disk_filename(filename, directory=nil)
+          timestamp = DateTime.now.strftime("%y%m%d%H%M%S")
+          ascii = ''
+          if %r{^[a-zA-Z0-9_\.\-]*$}.match?(filename) && filename.length <= 50
+            ascii = filename
+          else
+            ascii = Digest::MD5.hexdigest(filename)
+            # keep the extension if any
+            ascii << $1 if filename =~ %r{(\.[a-zA-Z0-9]+)$}
+          end
+          while RedmineS3::Connection.object(File.join(directory.to_s, "#{timestamp}_#{ascii}")).exists?
+            timestamp.succ!
+          end
+          "#{timestamp}_#{ascii}"
+        end
+
+        # Deletes all thumbnails
+        def clear_thumbnails
+          Redmine::Thumbnail.batch_delete!
+        end
+
       end
 
-      # Prevent file uploading to the file system to avoid change file name
-      def files_to_final_location; end
+      # Copies the temporary file to its final location
+      # and computes its MD5 hash
+      def files_to_final_location
+        if @temp_file
+          self.disk_directory = target_directory
+          self.disk_filename = Attachment.disk_filename(filename, disk_directory)
+          logger.info("Saving attachment '#{self.diskfile}' (#{@temp_file.size} bytes)") if logger
+          sha = Digest::SHA256.new
+          if @temp_file.respond_to?(:read)
+            buffer = ""
+            while (buffer = @temp_file.read(8192))
+              sha.update(buffer)
+            end
+          else
+            sha.update(@temp_file)
+          end
+
+          self.digest = sha.hexdigest
+        end
+        if content_type.blank? && filename.present?
+          self.content_type = Redmine::MimeType.of(filename)
+        end
+        # Don't save the content type if it's longer than the authorized length
+        if self.content_type && self.content_type.length > 255
+          self.content_type = nil
+        end
+
+        if @temp_file
+          raw_data =
+            if @temp_file.respond_to?(:read)
+              @temp_file.rewind
+              @temp_file.read
+            else
+              @temp_file
+            end
+          RedmineS3::Connection.put(self.diskfile, self.filename, raw_data,
+             (self.content_type || 'application/octet-stream'),
+             {digest: self.digest}
+          )
+        end
+      ensure
+        @temp_file = nil
+      end
+
+      def diskfile
+        Pathname.new(super).relative_path_from(Pathname.new(self.class.storage_path)).to_s
+      end
 
       # Returns the full path the attachment thumbnail, or nil
       # if the thumbnail cannot be generated.
-      def thumbnail_s3(options = {})
-        return unless thumbnailable?
+      def thumbnail(options = {})
+        return if !readable? || !thumbnailable?
+
         size = options[:size].to_i
         if size > 0
           # Limit the number of thumbnails per image
@@ -50,26 +104,123 @@ module RedmineS3
         else
           size = Setting.thumbnails_size.to_i
         end
-        size         = 100 unless size > 0
-        target       = "#{id}_#{digest}_#{size}.thumb"
-        update_thumb = options[:update_thumb] || false
+        size = 100 unless size > 0
+        target = thumbnail_path(size)
+
+        diskfile_s3  = diskfile
         begin
-          RedmineS3::ThumbnailPatch.generate_s3_thumb(self.disk_filename_s3, target, size, update_thumb)
+          Redmine::Thumbnail.generate(diskfile_s3, target, size)
         rescue => e
-          logger.error "An error occured while generating thumbnail for #{disk_filename_s3} to #{target}\nException was: #{e.message}" if logger
+          Rails.logger.error "An error occured while generating thumbnail for #{diskfile_s3} to #{target}\nException was: #{e.message}"
           return
         end
       end
 
-      def disk_filename_s3
-        path = disk_filename
-        path = File.join(disk_directory, path) unless disk_directory.blank?
-        path
+      # Returns true if the file is readable
+      def readable?
+        disk_filename.present? && self.s3_object(false).exists?
       end
 
-      def generate_thumbnail_s3
-        thumbnail_s3(update_thumb: true)
+      # Moves an existing attachment to its target directory
+      def move_to_target_directory!
+        return if new_record? || !readable?
+
+        src = diskfile
+        self.disk_directory = target_directory
+        dest = diskfile
+
+        return if src == dest
+
+        if !RedmineS3::Connection.move_object(src, dest)
+          Rails.logger.error "Could not move attachment from #{src} to #{dest}"
+          return
+        end
+
+        update_column :disk_directory, disk_directory
+      end
+
+      # Updates attachment digest to SHA256
+      def update_digest_to_sha256!
+        return unless readable?
+
+        object = self.s3_object
+        sha = Digest::SHA256.new
+        sha.update(object.get.body.read)
+        new_digest = sha.hexdigest
+
+        unless new_digest == object.metadata['digest']
+          object.copy_from(object,
+            acl:                  'public-read',
+            content_disposition:  object.content_disposition,
+            content_type:         object.content_type,
+            metadata:             object.metadata.merge({'digest' => new_digest}),
+            metadata_directive:   'REPLACE'
+          )
+        end
+
+        unless new_digest == self.digest
+          update_column :digest, new_digest
+        end
+      end
+
+      private
+
+      def reuse_existing_file_if_possible
+        reused = with_lock do
+          if existing = Attachment
+                          .where(digest: self.digest, filesize: self.filesize)
+                          .where('id <> ? and disk_filename <> ?',
+                                self.id, self.disk_filename)
+                          .first
+            existing.with_lock do
+              if self.readable? && existing.readable? &&
+                self.s3_object.metadata['digest'] == existing.s3_object.metadata['digest']
+
+                self.update_columns disk_directory: existing.disk_directory,
+                                    disk_filename: existing.disk_filename
+              end
+            end
+          end
+        end
+        if reused
+          self.s3_object.delete
+        end
+      rescue ActiveRecord::StatementInvalid, ActiveRecord::RecordNotFound
+        # Catch and ignore lock errors. It is not critical if deduplication does
+        # not happen, therefore we do not retry.
+        # with_lock throws ActiveRecord::RecordNotFound if the record isnt there
+        # anymore, thats why this is caught and ignored as well.
+      end
+
+      # Physically deletes the file from the file system
+      def delete_from_disk!
+        if disk_filename.present?
+          diskfile_s3 = diskfile
+          Rails.logger.debug("Deleting #{diskfile_s3}")
+          RedmineS3::Connection.delete(diskfile_s3)
+        end
+
+        Redmine::Thumbnail.batch_delete!(
+          thumbnail_path('*').sub(/\*\.thumb$/, '')
+        )
       end
     end
+
+  protected
+
+    def s3_object(reload = true)
+      object = RedmineS3::Connection.object(diskfile)
+      object.reload if reload && !object.data_loaded?
+      object
+    end
+
+  private
+
+    def thumbnail_path(size)
+      Pathname.new(
+        File.join(self.class.thumbnails_storage_path, "#{id}_#{digest}_#{size}.thumb")
+      ).relative_path_from(Pathname.new(self.class.thumbnails_storage_path)).to_s
+    end
+
   end
 end
