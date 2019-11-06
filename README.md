@@ -5,7 +5,7 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 
 ## Installation
 1. Make sure Redmine is installed and cd into it's root directory
-2. `git clone git://github.com/ka8725/redmine_s3.git plugins/redmine_s3`
+2. `git clone https://github.com/yoshiokaCB/redmine_s3.git`
 3. `cp plugins/redmine_s3/config/s3.yml.example config/s3.yml`
 4. Edit config/s3.yml with your favourite editor
 5. `bundle install --without development test` for installing this plugin dependencies (if you already did it, doing a `bundle install` again whould do no harm)
@@ -28,15 +28,12 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * bucket: string bucket name (required)
 * folder: string folder name inside bucket (for example: 'attachments')
 * endpoint: string endpoint instead of s3.amazonaws.com
-* port: integer port number
-* ssl: boolean true/false
-* secure: boolean true/false
 * private: boolean true/false
 * expires: integer number of seconds for private links to expire after being generated
 * proxy: boolean true/false
+* region: string aws region
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
 * Defaults to private: false, secure: false, proxy: false, default endpoint, default port, default ssl and default expires
-
 
 ## License
 
