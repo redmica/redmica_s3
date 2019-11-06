@@ -5,7 +5,7 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 
 ## Installation
 1. Make sure Redmine is installed and cd into it's root directory
-2. `git clone https://github.com/yoshiokaCB/redmine_s3.git`
+2. `git clone https://github.com/yoshiokaCB/redmine_s3.git plugins/redmine_s3`
 3. `cp plugins/redmine_s3/config/s3.yml.example config/s3.yml`
 4. Edit config/s3.yml with your favourite editor
 5. `bundle install --without development test` for installing this plugin dependencies (if you already did it, doing a `bundle install` again whould do no harm)
