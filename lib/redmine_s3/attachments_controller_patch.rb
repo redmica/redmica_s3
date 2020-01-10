@@ -77,14 +77,5 @@ module RedmineS3
 
     end
 
-  private
-
-    def s3_raw_data(url)
-      require 'open-uri'
-      raw_data = nil
-      open(url, 'rb') do |f| raw_data = f.read end
-      raw_data
-    end
-
   end
 end
