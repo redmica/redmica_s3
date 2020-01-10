@@ -23,7 +23,7 @@ module RedmineS3
               end
             end
             if @attachment.is_diff?
-              @diff = s3_raw_data(RedmineS3::Connection.object_url(@attachment.diskfile))
+              @diff = @attachment.raw_data
               @diff_type = params[:type] || User.current.pref[:diff_type] || 'inline'
               @diff_type = 'inline' unless %w(inline sbs).include?(@diff_type)
               # Save diff type as user preference
@@ -33,7 +33,7 @@ module RedmineS3
               end
               render action: 'diff'
             elsif @attachment.is_text? && @attachment.filesize <= Setting.file_max_size_displayed.to_i.kilobyte
-              @content = s3_raw_data(RedmineS3::Connection.object_url(@attachment.diskfile))
+              @content = @attachment.raw_data
               render action: 'file'
             elsif @attachment.is_image?
               render action: 'image'
@@ -51,8 +51,7 @@ module RedmineS3
         end
 
         if stale?(etag: @attachment.digest)
-          download_url = RedmineS3::Connection.object_url(@attachment.diskfile)
-          send_data s3_raw_data(download_url),
+          send_data @attachment.raw_data,
             filename: filename_for_content_disposition(@attachment.filename),
             type: detect_content_type(@attachment),
             disposition: disposition(@attachment)
