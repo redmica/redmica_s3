@@ -33,10 +33,7 @@ module RedmineS3
           unless object.exists?
             return nil unless Object.const_defined?(:MiniMagick)
 
-            require 'open-uri'
-            url = RedmineS3::Connection.object_url(source)
-            raw_data = nil
-            open(url, 'rb') do |f| raw_data = f.read end
+            raw_data = RedmineS3::Connection.object(source).reload.get.body.read rescue nil
             mime_type = MimeMagic.by_magic(raw_data).try(:type)
             return nil if mime_type.nil?
             return nil if !Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
@@ -53,7 +50,13 @@ module RedmineS3
                 end
               img = MiniMagick::Image.read(convert_output)
 
-              RedmineS3::Connection.put(target, File.basename(target), img.to_blob, img.mime_type, {target_folder: target_folder})
+              img_blob = img.to_blob
+              sha = Digest::SHA256.new
+              sha.update(img_blob)
+              new_digest = sha.hexdigest
+              RedmineS3::Connection.put(target, File.basename(target), img_blob, img.mime_type,
+                {target_folder: target_folder, digest: new_digest}
+              )
             rescue => e
               Rails.logger.error("Creating thumbnail failed (#{e.message}):")
               return nil
@@ -62,7 +65,8 @@ module RedmineS3
             end
           end
 
-          RedmineS3::Connection.object_url(target, target_folder)
+          object.reload
+          [object.metadata['digest'], object.get.body.read]
         end
       end
     end

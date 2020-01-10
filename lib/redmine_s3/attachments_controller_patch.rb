@@ -59,14 +59,17 @@ module RedmineS3
       end
 
       def thumbnail
-        if @attachment.thumbnailable? && tbnail = @attachment.thumbnail(:size => params[:size])
-          if stale?(etag: tbnail)
-            send_data s3_raw_data(tbnail),
+        begin
+          raise unless @attachment.thumbnailable?
+          digest, raw_data = @attachment.thumbnail(:size => params[:size])
+          raise unless raw_data
+          if stale?(etag: digest)
+            send_data raw_data,
               filename: filename_for_content_disposition(@attachment.filename),
               type: detect_content_type(@attachment),
               disposition: 'inline'
           end
-        else
+        rescue
           # No thumbnail for the attachment or thumbnail could not be created
           head 404
         end
