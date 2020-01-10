@@ -11,12 +11,8 @@ module RedmineS3
       bucket:             nil,
       folder:             '',
       endpoint:           nil,
-#      port:               nil,
-#      ssl:                nil,
       private:            false,
       expires:            nil,
-#      secure:             false,
-      proxy:              false,
       thumb_folder:       'tmp',
       region:             nil,
     }
@@ -36,10 +32,6 @@ module RedmineS3
             ''
           end
         ).presence
-      end
-
-      def proxy?
-        @@s3_options[:proxy]
       end
 
       def thumb_folder

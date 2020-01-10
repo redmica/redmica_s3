@@ -20,7 +20,6 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * Public and private files can use HTTPS urls using the secure option
 * Files can use private signed urls using the private option
 * Private file urls can expire a set time after the links were generated using the expires option
-* If you're using a Amazon S3 clone, then you can do the download relay by using the proxy option.
 
 ## Options Detail
 * access_key_id: string key (required)
@@ -30,10 +29,9 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * endpoint: string endpoint instead of s3.amazonaws.com
 * private: boolean true/false
 * expires: integer number of seconds for private links to expire after being generated
-* proxy: boolean true/false
 * region: string aws region
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
-* Defaults to private: false, secure: false, proxy: false, default endpoint, default port, default ssl and default expires
+* Defaults to private: false, secure: false, default endpoint, default port, default ssl and default expires
 
 ## License
 

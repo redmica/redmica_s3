@@ -6,7 +6,6 @@ production:
   endpoint:
   private:
   expires:
-  proxy:
   thumb_folder:
   region:
 
@@ -18,7 +17,6 @@ development:
   endpoint:
   private:
   expires:
-  proxy:
   thumb_folder:
   region:
 

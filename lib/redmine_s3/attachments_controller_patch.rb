@@ -52,29 +52,20 @@ module RedmineS3
 
         if stale?(etag: @attachment.digest)
           download_url = RedmineS3::Connection.object_url(@attachment.diskfile)
-          if RedmineS3::Connection.proxy?
-            # images are sent inline
-            send_data s3_raw_data(download_url),
-              filename: filename_for_content_disposition(@attachment.filename),
-              type: detect_content_type(@attachment),
-              disposition: disposition(@attachment)
-          else
-            redirect_to(download_url)
-          end
+          send_data s3_raw_data(download_url),
+            filename: filename_for_content_disposition(@attachment.filename),
+            type: detect_content_type(@attachment),
+            disposition: disposition(@attachment)
         end
       end
 
       def thumbnail
         if @attachment.thumbnailable? && tbnail = @attachment.thumbnail(:size => params[:size])
           if stale?(etag: tbnail)
-            if RedmineS3::Connection.proxy?
-              send_data s3_raw_data(tbnail),
-                filename: filename_for_content_disposition(@attachment.filename),
-                type: detect_content_type(@attachment),
-                disposition: 'inline'
-            else
-              redirect_to(tbnail)
-            end
+            send_data s3_raw_data(tbnail),
+              filename: filename_for_content_disposition(@attachment.filename),
+              type: detect_content_type(@attachment),
+              disposition: 'inline'
           end
         else
           # No thumbnail for the attachment or thumbnail could not be created
