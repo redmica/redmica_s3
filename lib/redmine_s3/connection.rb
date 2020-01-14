@@ -80,12 +80,6 @@ module RedmineS3
         end
       end
 
-      def get(filename, target_folder = self.folder)
-        object = object(filename, target_folder)
-        object.reload unless object.data_loaded?
-        object.data
-      end
-
       def object(filename, target_folder = self.folder)
         object_nm = File.join([target_folder.presence, filename.presence].compact)
         own_bucket.object(object_nm)
