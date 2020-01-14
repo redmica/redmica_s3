@@ -69,17 +69,6 @@ module RedmineS3
         object.delete
       end
 
-      def object_url(filename, target_folder = self.folder)
-        object = object(filename, target_folder)
-        if private?
-          options = {}
-          options[:expires_in] = expires unless expires.nil?
-          object.presigned_url(:get, options)
-        else
-          object.public_url
-        end
-      end
-
       def object(filename, target_folder = self.folder)
         object_nm = File.join([target_folder.presence, filename.presence].compact)
         own_bucket.object(object_nm)
