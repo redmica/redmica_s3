@@ -12,7 +12,6 @@ module RedmineS3
       folder:             '',
       endpoint:           nil,
       private:            false,
-      expires:            nil,
       thumb_folder:       'tmp',
       region:             nil,
     }
@@ -128,15 +127,11 @@ module RedmineS3
         @@s3_options[:region]
       end
 
-      def expires
-        @@s3_options[:expires]
-      end
-
       def private?
         @@s3_options[:private]
       end
     end
 
-    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region, :expires, :private?
+    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region, :private?
   end
 end
