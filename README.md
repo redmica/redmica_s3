@@ -14,7 +14,6 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 
 ## Options Overview
 * The bucket specified in s3.yml will be created automatically when the plugin is loaded (this is generally when the server starts).
-* After files are uploaded they are made public, unless private is set to true.
 
 ## Options Detail
 * access_key_id: string key (required)
@@ -22,10 +21,8 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * bucket: string bucket name (required)
 * folder: string folder name inside bucket (for example: 'attachments')
 * endpoint: string endpoint instead of s3.amazonaws.com
-* private: boolean true/false
-* region: string aws region
+* region: string aws region (activate when endpoint is not set)
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
-* Defaults to private: false, default endpoint
 
 ## License
 

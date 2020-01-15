@@ -11,7 +11,6 @@ module RedmineS3
       bucket:             nil,
       folder:             '',
       endpoint:           nil,
-      private:            false,
       thumb_folder:       'tmp',
       region:             nil,
     }
@@ -51,7 +50,6 @@ module RedmineS3
           body:                 data,
           content_disposition:  "inline; filename=#{ERB::Util.url_encode(original_filename)}",
         }
-        options[:acl] = 'public-read' unless private?
         options[:content_type] = content_type if content_type
         if digest
           options[:metadata] = {
@@ -126,12 +124,8 @@ module RedmineS3
       def region
         @@s3_options[:region]
       end
-
-      def private?
-        @@s3_options[:private]
-      end
     end
 
-    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region, :private?
+    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region
   end
 end
