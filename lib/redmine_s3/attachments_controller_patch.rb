@@ -23,7 +23,7 @@ module RedmineS3
               end
             end
             if @attachment.is_diff?
-              @diff = s3_raw_data(RedmineS3::Connection.object_url(@attachment.diskfile))
+              @diff = @attachment.raw_data
               @diff_type = params[:type] || User.current.pref[:diff_type] || 'inline'
               @diff_type = 'inline' unless %w(inline sbs).include?(@diff_type)
               # Save diff type as user preference
@@ -33,7 +33,7 @@ module RedmineS3
               end
               render action: 'diff'
             elsif @attachment.is_text? && @attachment.filesize <= Setting.file_max_size_displayed.to_i.kilobyte
-              @content = s3_raw_data(RedmineS3::Connection.object_url(@attachment.diskfile))
+              @content = @attachment.raw_data
               render action: 'file'
             elsif @attachment.is_image?
               render action: 'image'
@@ -51,46 +51,30 @@ module RedmineS3
         end
 
         if stale?(etag: @attachment.digest)
-          download_url = RedmineS3::Connection.object_url(@attachment.diskfile)
-          if RedmineS3::Connection.proxy?
-            # images are sent inline
-            send_data s3_raw_data(download_url),
-              filename: filename_for_content_disposition(@attachment.filename),
-              type: detect_content_type(@attachment),
-              disposition: disposition(@attachment)
-          else
-            redirect_to(download_url)
-          end
+          send_data @attachment.raw_data,
+            filename: filename_for_content_disposition(@attachment.filename),
+            type: detect_content_type(@attachment),
+            disposition: disposition(@attachment)
         end
       end
 
       def thumbnail
-        if @attachment.thumbnailable? && tbnail = @attachment.thumbnail(:size => params[:size])
-          if stale?(etag: tbnail)
-            if RedmineS3::Connection.proxy?
-              send_data s3_raw_data(tbnail),
-                filename: filename_for_content_disposition(@attachment.filename),
-                type: detect_content_type(@attachment),
-                disposition: 'inline'
-            else
-              redirect_to(tbnail)
-            end
+        begin
+          raise unless @attachment.thumbnailable?
+          digest, raw_data = @attachment.thumbnail(:size => params[:size])
+          raise unless raw_data
+          if stale?(etag: digest)
+            send_data raw_data,
+              filename: filename_for_content_disposition(@attachment.filename),
+              type: detect_content_type(@attachment),
+              disposition: 'inline'
           end
-        else
+        rescue
           # No thumbnail for the attachment or thumbnail could not be created
           head 404
         end
       end
 
-    end
-
-  private
-
-    def s3_raw_data(url)
-      require 'open-uri'
-      raw_data = nil
-      open(url, 'rb') do |f| raw_data = f.read end
-      raw_data
     end
 
   end

@@ -4,9 +4,6 @@ production:
   bucket:
   folder:
   endpoint:
-  private:
-  expires:
-  proxy:
   thumb_folder:
   region:
 
@@ -16,9 +13,6 @@ development:
   bucket:
   folder:
   endpoint:
-  private:
-  expires:
-  proxy:
   thumb_folder:
   region:
 

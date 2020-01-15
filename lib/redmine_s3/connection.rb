@@ -11,12 +11,6 @@ module RedmineS3
       bucket:             nil,
       folder:             '',
       endpoint:           nil,
-#      port:               nil,
-#      ssl:                nil,
-      private:            false,
-      expires:            nil,
-#      secure:             false,
-      proxy:              false,
       thumb_folder:       'tmp',
       region:             nil,
     }
@@ -38,10 +32,6 @@ module RedmineS3
         ).presence
       end
 
-      def proxy?
-        @@s3_options[:proxy]
-      end
-
       def thumb_folder
         str = @@s3_options[:thumb_folder]
         (
@@ -60,7 +50,6 @@ module RedmineS3
           body:                 data,
           content_disposition:  "inline; filename=#{ERB::Util.url_encode(original_filename)}",
         }
-        options[:acl] = 'public-read' unless private?
         options[:content_type] = content_type if content_type
         if digest
           options[:metadata] = {
@@ -75,23 +64,6 @@ module RedmineS3
       def delete(filename, target_folder = self.folder)
         object = object(filename, target_folder)
         object.delete
-      end
-
-      def object_url(filename, target_folder = self.folder)
-        object = object(filename, target_folder)
-        if private?
-          options = {}
-          options[:expires_in] = expires unless expires.nil?
-          object.presigned_url(:get, options)
-        else
-          object.public_url
-        end
-      end
-
-      def get(filename, target_folder = self.folder)
-        object = object(filename, target_folder)
-        object.reload unless object.data_loaded?
-        object.data
       end
 
       def object(filename, target_folder = self.folder)
@@ -152,16 +124,8 @@ module RedmineS3
       def region
         @@s3_options[:region]
       end
-
-      def expires
-        @@s3_options[:expires]
-      end
-
-      def private?
-        @@s3_options[:private]
-      end
     end
 
-    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region, :expires, :private?
+    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region
   end
 end
