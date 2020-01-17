@@ -50,7 +50,7 @@ module RedmineS3
           @attachment.increment_download
         end
 
-        if stale?(etag: @attachment.digest)
+        if stale?(etag: @attachment.digest, template: false)
           send_data @attachment.raw_data,
             filename: filename_for_content_disposition(@attachment.filename),
             type: detect_content_type(@attachment),
@@ -63,7 +63,7 @@ module RedmineS3
           raise unless @attachment.thumbnailable?
           digest, raw_data = @attachment.thumbnail(:size => params[:size])
           raise unless raw_data
-          if stale?(etag: digest)
+          if stale?(etag: digest, template: false)
             send_data raw_data,
               filename: filename_for_content_disposition(@attachment.filename),
               type: detect_content_type(@attachment, true),
