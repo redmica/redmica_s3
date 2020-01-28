@@ -1,4 +1,4 @@
-namespace :redmine_s3 do
+namespace :redmica_s3 do
   desc 'Upload the attachment files to AWS S3.'
   task files_to_s3: :environment do
     require 'thread'
