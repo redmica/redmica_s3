@@ -1,4 +1,4 @@
-module RedmineS3
+module RedmicaS3
   module AttachmentPatch
     extend ActiveSupport::Concern
 
@@ -29,7 +29,7 @@ module RedmineS3
             # keep the extension if any
             ascii << $1 if filename =~ %r{(\.[a-zA-Z0-9]+)$}
           end
-          while RedmineS3::Connection.object(File.join(directory.to_s, "#{timestamp}_#{ascii}")).exists?
+          while RedmicaS3::Connection.object(File.join(directory.to_s, "#{timestamp}_#{ascii}")).exists?
             timestamp.succ!
           end
           "#{timestamp}_#{ascii}"
@@ -77,7 +77,7 @@ module RedmineS3
             else
               @temp_file
             end
-          RedmineS3::Connection.put(self.diskfile, self.filename, raw_data,
+          RedmicaS3::Connection.put(self.diskfile, self.filename, raw_data,
              (self.content_type || 'application/octet-stream'),
              {digest: self.digest}
           )
@@ -131,7 +131,7 @@ module RedmineS3
 
         return if src == dest
 
-        if !RedmineS3::Connection.move_object(src, dest)
+        if !RedmicaS3::Connection.move_object(src, dest)
           Rails.logger.error "Could not move attachment from #{src} to #{dest}"
           return
         end
@@ -197,7 +197,7 @@ module RedmineS3
         if disk_filename.present?
           diskfile_s3 = diskfile
           Rails.logger.debug("Deleting #{diskfile_s3}")
-          RedmineS3::Connection.delete(diskfile_s3)
+          RedmicaS3::Connection.delete(diskfile_s3)
         end
 
         Redmine::Thumbnail.batch_delete!(
@@ -217,7 +217,7 @@ module RedmineS3
   protected
 
     def s3_object(reload = true)
-      object = RedmineS3::Connection.object(diskfile)
+      object = RedmicaS3::Connection.object(diskfile)
       object.reload if reload && !object.data_loaded?
       object
     end

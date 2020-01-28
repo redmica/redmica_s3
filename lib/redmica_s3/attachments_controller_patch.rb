@@ -1,4 +1,4 @@
-module RedmineS3
+module RedmicaS3
   module AttachmentsControllerPatch
     extend ActiveSupport::Concern
 

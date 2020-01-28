@@ -11,9 +11,9 @@ Redmine::Plugin.register :redmica_s3 do
   version '0.0.3'
 
   Rails.configuration.to_prepare do
-    Redmine::Thumbnail.__send__(:include, RedmineS3::ThumbnailPatch)
-    Attachment.__send__(:include, RedmineS3::AttachmentPatch)
-    AttachmentsController.__send__(:include, RedmineS3::AttachmentsControllerPatch)
+    Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
+    Attachment.__send__(:include, RedmicaS3::AttachmentPatch)
+    AttachmentsController.__send__(:include, RedmicaS3::AttachmentsControllerPatch)
   end
-  RedmineS3::Connection.create_bucket
+  RedmicaS3::Connection.create_bucket
 end
