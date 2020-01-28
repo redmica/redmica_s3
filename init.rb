@@ -1,7 +1,7 @@
-require 'redmine_s3/attachment_patch'
-require 'redmine_s3/attachments_controller_patch'
-require 'redmine_s3/thumbnail_patch'
-require 'redmine_s3/connection'
+require 'redmica_s3/attachment_patch'
+require 'redmica_s3/attachments_controller_patch'
+require 'redmica_s3/thumbnail_patch'
+require 'redmica_s3/connection'
 
 Redmine::Plugin.register :redmica_s3 do
   requires_redmine version_or_higher: '4.1.0'
