@@ -4,11 +4,14 @@ require 'redmica_s3/thumbnail_patch'
 require 'redmica_s3/connection'
 
 Redmine::Plugin.register :redmica_s3 do
-  requires_redmine version_or_higher: '4.1.0'
   name 'RedMica S3 plugin'
-  author 'Far End Technologies, Inc.'
   description 'Use Amazon S3 as a storage engine for attachments'
-  version '0.0.3'
+  url 'https://github.com/redmica/redmica_s3'
+  author 'Far End Technologies Corporation'
+  author_url 'https://www.farend.co.jp'
+
+  version '1.0.0'
+  requires_redmine version_or_higher: '4.1.0'
 
   Rails.configuration.to_prepare do
     Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
