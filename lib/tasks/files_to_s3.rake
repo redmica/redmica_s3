@@ -1,4 +1,4 @@
-namespace :redmine_s3 do
+namespace :redmica_s3 do
   desc 'Upload the attachment files to AWS S3.'
   task files_to_s3: :environment do
     require 'thread'
@@ -22,7 +22,7 @@ namespace :redmine_s3 do
       source   = data[:source]
       target   = data[:target]
       return if target.nil?
-      object = RedmineS3::Connection.object(target)
+      object = RedmicaS3::Connection.object(target)
       # get the file modified time, which will stay nil if the file doesn't exist yet
       # we could check if the file exists, but this saves a head request
       s3_mtime = object.last_modified rescue nil
@@ -38,7 +38,7 @@ namespace :redmine_s3 do
           end
           content_type = IO.popen(["file", "--brief", "--mime-type", file_obj.path], in: :close, err: :close) { |io| io.read.chomp } rescue nil
           content_type ||= 'application/octet-stream'
-          RedmineS3::Connection.put(target, filename, file_obj.read, content_type, {digest: digest})
+          RedmicaS3::Connection.put(target, filename, file_obj.read, content_type, {digest: digest})
         end
 
         puts "Put file #{target}"

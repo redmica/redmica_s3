@@ -1,4 +1,4 @@
-module RedmineS3
+module RedmicaS3
   module ThumbnailPatch
     extend ActiveSupport::Concern
 
@@ -8,9 +8,9 @@ module RedmineS3
 
     class_methods do
       def batch_delete!(target_prefix = nil)
-        prefix = File.join(RedmineS3::Connection.thumb_folder, "#{target_prefix}")
+        prefix = File.join(RedmicaS3::Connection.thumb_folder, "#{target_prefix}")
 
-        bucket = RedmineS3::Connection.__send__(:own_bucket)
+        bucket = RedmicaS3::Connection.__send__(:own_bucket)
         bucket.objects({prefix: prefix}).batch_delete!
         return
       end
@@ -29,12 +29,12 @@ module RedmineS3
           return nil unless convert_available?
           return nil if is_pdf && !gs_available?
 
-          target_folder = RedmineS3::Connection.thumb_folder
-          object = RedmineS3::Connection.object(target, target_folder)
+          target_folder = RedmicaS3::Connection.thumb_folder
+          object = RedmicaS3::Connection.object(target, target_folder)
           unless object.exists?
             return nil unless Object.const_defined?(:MiniMagick)
 
-            raw_data = RedmineS3::Connection.object(source).reload.get.body.read rescue nil
+            raw_data = RedmicaS3::Connection.object(source).reload.get.body.read rescue nil
             mime_type = MimeMagic.by_magic(raw_data).try(:type)
             return nil if mime_type.nil?
             return nil if !Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
@@ -64,7 +64,7 @@ module RedmineS3
               sha = Digest::SHA256.new
               sha.update(img_blob)
               new_digest = sha.hexdigest
-              RedmineS3::Connection.put(target, File.basename(target), img_blob, img.mime_type,
+              RedmicaS3::Connection.put(target, File.basename(target), img_blob, img.mime_type,
                 {target_folder: target_folder, digest: new_digest}
               )
             rescue => e

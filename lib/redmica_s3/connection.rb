@@ -2,7 +2,7 @@ require 'aws-sdk-s3'
 
 Aws.config[:ssl_verify_peer] = false
 
-module RedmineS3
+module RedmicaS3
   module Connection
     @@conn = nil
     @@s3_options = {

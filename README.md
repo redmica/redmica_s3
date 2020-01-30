@@ -1,16 +1,16 @@
-# S3 plugin for Redmine
+# S3 plugin for Redmine/RedMica
 
 ## Description
-This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem. This is a fork for [original gem](http://github.com/tigrish/redmine_s3) and difference is that this one supports Redmine 4.1.x and later
+This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem. This is a fork for [original gem](http://github.com/tigrish/redmine_s3) and difference is that this one supports [RedMica](https://github.com/redmica/redmica) 1.0.x(compatible with Redmine 4.1.x and later)
 
 ## Installation
 1. Make sure Redmine is installed and cd into it's root directory
-2. `git clone -b 4.1-stable https://github.com/farend/redmine_s3.git plugins/redmine_s3`
-3. `cp plugins/redmine_s3/config/s3.yml.example config/s3.yml`
+2. `git clone https://github.com/redmica/redmica_s3.git plugins/redmica_s3`
+3. `cp plugins/redmica_s3/config/s3.yml.example config/s3.yml`
 4. Edit config/s3.yml with your favourite editor
 5. `bundle install --without development test` for installing this plugin dependencies (if you already did it, doing a `bundle install` again would do no harm)
 6. Restart web server/upload to production/whatever
-7. *Optional*: Run `rake redmine_s3:files_to_s3` to upload files in your files folder to s3
+7. *Optional*: Run `rake redmica_s3:files_to_s3` to upload files in your files folder to s3
 
 ## Options Overview
 * The bucket specified in s3.yml will be created automatically when the plugin is loaded (this is generally when the server starts).
