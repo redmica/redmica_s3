@@ -1,6 +1,8 @@
 require 'redmica_s3/attachment_patch'
 require 'redmica_s3/attachments_controller_patch'
+require 'redmica_s3/import_patch'
 require 'redmica_s3/thumbnail_patch'
+require 'redmica_s3/utils_patch'
 require 'redmica_s3/connection'
 
 Redmine::Plugin.register :redmica_s3 do
@@ -15,7 +17,9 @@ Redmine::Plugin.register :redmica_s3 do
 
   Rails.configuration.to_prepare do
     Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
+    Redmine::Utils.__send__(:include, RedmicaS3::UtilsPatch)
     Attachment.__send__(:include, RedmicaS3::AttachmentPatch)
+    Import.__send__(:include, RedmicaS3::ImportPatch)
     AttachmentsController.__send__(:include, RedmicaS3::AttachmentsControllerPatch)
   end
   RedmicaS3::Connection.create_bucket
