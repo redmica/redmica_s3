@@ -12,6 +12,7 @@ module RedmicaS3
       folder:             '',
       endpoint:           nil,
       thumb_folder:       'tmp',
+      import_folder:      'tmp',
       region:             nil,
     }
 
@@ -34,6 +35,17 @@ module RedmicaS3
 
       def thumb_folder
         str = @@s3_options[:thumb_folder]
+        (
+          if str.present?
+            str.match(/\S+\//) ? str : "#{str}/"
+          else
+            'tmp/'
+          end
+        ).presence
+      end
+
+      def import_folder
+        str = @@s3_options[:import_folder]
         (
           if str.present?
             str.match(/\S+\//) ? str : "#{str}/"

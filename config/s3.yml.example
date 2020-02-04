@@ -5,6 +5,7 @@ production:
   folder:
   endpoint:
   thumb_folder:
+  import_folder:
   region:
 
 development:
@@ -14,6 +15,7 @@ development:
   folder:
   endpoint:
   thumb_folder:
+  import_folder:
   region:
 
 # Uncomment this to run plugin tests with standart redmine script
