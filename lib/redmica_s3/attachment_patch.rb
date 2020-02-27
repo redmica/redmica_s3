@@ -150,7 +150,6 @@ module RedmicaS3
 
         unless new_digest == object.metadata['digest']
           object.copy_from(object,
-            acl:                  'public-read',
             content_disposition:  object.content_disposition,
             content_type:         object.content_type,
             metadata:             object.metadata.merge({'digest' => new_digest}),
