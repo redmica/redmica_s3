@@ -25,6 +25,9 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
 * import_folder: string folder where import files are stored temporarily; defaults to 'tmp'
 
-## License
+## Forked From
+* https://github.com/tigrish/redmine_s3
+* https://github.com/ka8725/redmine_s3
 
+## License
 This plugin is released under the [MIT License](http://www.opensource.org/licenses/MIT).
