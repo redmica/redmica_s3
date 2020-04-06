@@ -75,6 +75,18 @@ module RedmicaS3
         end
       end
 
+      def download_all
+        raw_data = Attachment.archive_attachments(nil, @attachments)
+        if raw_data
+          filename = "#{@container.class.to_s.downcase}-#{@container.id}-attachments.zip"
+          send_data raw_data,
+            filename: filename,
+            type: Redmine::MimeType.of(filename)
+        else
+          render_404
+        end
+      end
+
     end
 
   end
