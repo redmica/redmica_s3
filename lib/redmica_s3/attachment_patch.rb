@@ -42,18 +42,18 @@ module RedmicaS3
           Redmine::Thumbnail.batch_delete!
         end
 
-        def archive_attachments(out_file, attachments)
+        def archive_attachments(attachments)
           attachments = attachments.select(&:readable?)
           return nil if attachments.blank?
 
           Zip.unicode_names = true
-          archived_filenames = []
-          Zip::OutputStream.write_buffer do |zos|
+          archived_file_names = []
+          buffer = Zip::OutputStream.write_buffer do |zos|
             attachments.each do |attachment|
               filename = attachment.filename
               # rename the file if a file with the same name already exists
               dup_count = 0
-              while archived_filenames.include?(filename)
+              while archived_file_names.include?(filename)
                 dup_count += 1
                 extname = File.extname(attachment.filename)
                 basename = File.basename(attachment.filename, extname)
@@ -61,9 +61,12 @@ module RedmicaS3
               end
               zos.put_next_entry(filename)
               zos << attachment.raw_data
-              archived_filenames << filename
+              archived_file_names << filename
             end
-          end.string
+          end
+          buffer.string
+        ensure
+          buffer&.close
         end
 
       end
