@@ -1,3 +1,5 @@
+require "zip"
+
 module RedmicaS3
   module AttachmentPatch
     extend ActiveSupport::Concern
@@ -38,6 +40,33 @@ module RedmicaS3
         # Deletes all thumbnails
         def clear_thumbnails
           Redmine::Thumbnail.batch_delete!
+        end
+
+        def archive_attachments(attachments)
+          attachments = attachments.select(&:readable?)
+          return nil if attachments.blank?
+
+          Zip.unicode_names = true
+          archived_file_names = []
+          buffer = Zip::OutputStream.write_buffer do |zos|
+            attachments.each do |attachment|
+              filename = attachment.filename
+              # rename the file if a file with the same name already exists
+              dup_count = 0
+              while archived_file_names.include?(filename)
+                dup_count += 1
+                extname = File.extname(attachment.filename)
+                basename = File.basename(attachment.filename, extname)
+                filename = "#{basename}(#{dup_count})#{extname}"
+              end
+              zos.put_next_entry(filename)
+              zos << attachment.raw_data
+              archived_file_names << filename
+            end
+          end
+          buffer.string
+        ensure
+          buffer&.close
         end
 
       end
