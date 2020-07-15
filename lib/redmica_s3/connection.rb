@@ -14,6 +14,7 @@ module RedmicaS3
       thumb_folder:       'tmp',
       import_folder:      'tmp',
       region:             nil,
+      force_path_style:   false,
     }
 
     class << self
@@ -105,6 +106,8 @@ module RedmicaS3
           options[:endpoint] = endpoint
         elsif region.present?
           options[:region] = region
+        elsif force_path_style
+          options[:force_path_style] = force_path_style
         end
         @@conn = Aws::S3::Resource.new(options)
       end
@@ -135,6 +138,10 @@ module RedmicaS3
 
       def region
         @@s3_options[:region]
+      end
+
+      def force_path_style
+        @@s3_options[:force_path_style]
       end
     end
 
