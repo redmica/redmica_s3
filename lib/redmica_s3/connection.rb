@@ -26,7 +26,7 @@ module RedmicaS3
         str = @@s3_options[:folder]
         (
           if str.present?
-            str.match(/\S+\//) ? str : "#{str}/"
+            /\S+\/\z/.match?(str) ? str : "#{str}/"
           else
             ''
           end
@@ -37,7 +37,7 @@ module RedmicaS3
         str = @@s3_options[:thumb_folder]
         (
           if str.present?
-            str.match(/\S+\//) ? str : "#{str}/"
+            /\S+\/\z/.match?(str) ? str : "#{str}/"
           else
             'tmp/'
           end
@@ -48,7 +48,7 @@ module RedmicaS3
         str = @@s3_options[:import_folder]
         (
           if str.present?
-            str.match(/\S+\//) ? str : "#{str}/"
+            /\S+\/\z/.match?(str) ? str : "#{str}/"
           else
             'tmp/'
           end
