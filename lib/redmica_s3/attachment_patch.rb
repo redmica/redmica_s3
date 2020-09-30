@@ -200,7 +200,8 @@ module RedmicaS3
                           .where(digest: self.digest, filesize: self.filesize)
                           .where('id <> ? and disk_filename <> ?',
                                 self.id, self.disk_filename)
-                          .first
+                          .order(:id)
+                          .last
             existing.with_lock do
               if self.readable? && existing.readable? &&
                 object.metadata['digest'] == existing.s3_object.metadata['digest']
