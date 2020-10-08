@@ -17,10 +17,10 @@ Redmine::Plugin.register :redmica_s3 do
   requires_redmine version_or_higher: '4.1.0'
 
   Rails.configuration.to_prepare do
-    Redmine::Export::PDF::ITCPDF.__send__(:include, RedmicaS3::PdfPatch)
     Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
     Redmine::Utils.__send__(:include, RedmicaS3::UtilsPatch)
     Attachment.__send__(:include, RedmicaS3::AttachmentPatch)
+    Redmine::Export::PDF::ITCPDF.__send__(:include, RedmicaS3::PdfPatch)
     Import.__send__(:include, RedmicaS3::ImportPatch)
     AttachmentsController.__send__(:include, RedmicaS3::AttachmentsControllerPatch)
   end
