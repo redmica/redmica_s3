@@ -46,14 +46,19 @@ module RedmicaS3
 
           prevy = @y
           xpos = @x
-          # eliminate marker spaces
-          if !dom[key - 1].nil?
-            if (dom[key - 1]['value'] == ' ') or !dom[key - 1]['trimmed_space'].nil?
-              xpos -= GetStringWidth(32.chr)
-            elsif @rtl and (dom[key - 1]['value'] == '  ')
-              xpos += 2 * GetStringWidth(32.chr)
+          xpos +=
+            # eliminate marker spaces
+            if !dom[key - 1].nil?
+              if (dom[key - 1]['value'] == ' ') or !dom[key - 1]['trimmed_space'].nil?
+                -GetStringWidth(32.chr)
+              elsif @rtl and (dom[key - 1]['value'] == '  ')
+                2 * GetStringWidth(32.chr)
+              else
+                0
+              end
+            else
+              0
             end
-          end
 
           imglink = ''
           if !@href['url'].nil? and !empty_string(@href['url'])
