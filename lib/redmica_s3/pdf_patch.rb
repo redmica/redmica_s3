@@ -37,8 +37,7 @@ module RedmicaS3
           tag['attribute']['src'].gsub!(/%([0-9a-fA-F]{2})/){$1.hex.chr}
 
           img_name = tag['attribute']['src']
-          type = getImageFileType(tag['attribute']['src'])
-          tag['attribute']['src'] = get_image_filename(tag['attribute']['src'])
+          tag['attribute']['src'] = get_image_filename(img_name)
 
           tag['width'] ||= 0
           tag['height'] ||= 0
