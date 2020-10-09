@@ -95,21 +95,10 @@ module RedmicaS3
           SetLeftMargin(@l_margin + @c_margin)
           SetRightMargin(@r_margin + @c_margin)
 
-          begin
-            if tag['attribute']['src'].is_a?(Attachment) || /^http/.match?(tag['attribute']['src'])
-              tmpFile = get_image_file(tag['attribute']['src'])
-              img_file = tmpFile.path
-            else
-              img_file = tag['attribute']['src']
+          result_img =
+            proc_image_file(tag['attribute']['src']) do |img_file|
+              Image(img_file, xpos, @y, iw, ih, '', imglink, align, false, 300, '', false, false, border, false, false, true)
             end
-            result_img = Image(img_file, xpos, @y, iw, ih, '', imglink, align, false, 300, '', false, false, border, false, false, true)
-          rescue => err
-            logger.error "pdf: Image: error: #{err.message}"
-            result_img = false
-          ensure
-            # remove temp files
-            tmpFile.close(true) unless tmpFile.nil?
-          end
 
           @y =
             if result_img or ih != 0
@@ -166,6 +155,26 @@ module RedmicaS3
       end
       tmpFile.fsync
       tmpFile
+    end
+
+    private
+
+    def proc_image_file(src, &block)
+      tmpFile = nil
+      img_file =
+        if src.is_a?(Attachment) || /^http/.match?(src)
+          tmpFile = get_image_file(src)
+          tmpFile.path
+        else
+          src
+        end
+      yield img_file
+    rescue => err
+      logger.error "pdf: Image: error: #{err.message}"
+      false
+    ensure
+      # remove temp files
+      tmpFile.close(true) if tmpFile
     end
   end
 end
