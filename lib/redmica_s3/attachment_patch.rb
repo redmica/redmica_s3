@@ -195,11 +195,11 @@ module RedmicaS3
 
       def reuse_existing_file_if_possible
         object = self.s3_object
+        original_filename = disk_filename
         reused = with_lock do
           if existing = Attachment
                           .where(digest: self.digest, filesize: self.filesize)
-                          .where('id <> ? and disk_filename <> ?',
-                                self.id, self.disk_filename)
+                          .where.not(disk_filename: original_filename)
                           .order(:id)
                           .last
             existing.with_lock do
@@ -212,7 +212,7 @@ module RedmicaS3
             end
           end
         end
-        if reused
+        if reused && Attachment.where(disk_filename: original_filename).none?
           object.delete
         end
       rescue ActiveRecord::StatementInvalid, ActiveRecord::RecordNotFound
