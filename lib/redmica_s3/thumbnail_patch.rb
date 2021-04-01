@@ -35,8 +35,7 @@ module RedmicaS3
             return nil unless Object.const_defined?(:MiniMagick)
 
             raw_data = RedmicaS3::Connection.object(source).reload.get.body.read rescue nil
-            mime_type = MimeMagic.by_magic(raw_data).try(:type)
-            return nil if mime_type.nil?
+            mime_type = Marcel::MimeType.for(raw_data)
             return nil if !Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
             return nil if is_pdf && mime_type != "application/pdf"
 
