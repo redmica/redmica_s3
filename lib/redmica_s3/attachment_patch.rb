@@ -19,6 +19,11 @@ module RedmicaS3
       end
 
       module ClassMethods
+        # Claims a unique ASCII or hashed filename, yields the open file handle
+        def create_diskfile(filename, directory=nil, &block)
+          raise NoMethodError, "#{self}.#{__method__} cannot be used with redmica_s3 plugin."
+        end
+
         # Returns an ASCII or hashed filename that do not
         # exists yet in the given subdirectory
         def disk_filename(filename, directory=nil)
@@ -31,10 +36,19 @@ module RedmicaS3
             # keep the extension if any
             ascii << $1 if filename =~ %r{(\.[a-zA-Z0-9]+)$}
           end
-          while RedmicaS3::Connection.object(File.join(directory.to_s, "#{timestamp}_#{ascii}")).exists?
-            timestamp.succ!
-          end
-          "#{timestamp}_#{ascii}"
+          directory = directory.to_s
+          result =
+            loop do
+              s3obj = RedmicaS3::Connection.object(File.join(directory, "#{timestamp}_#{ascii}"))
+              if s3obj.exists?
+                timestamp.succ!
+              else
+                # Avoid race condition: Create an empty S3 object
+                s3obj.put
+                break File.basename(s3obj.key)
+              end
+            end
+          result
         end
 
         # Deletes all thumbnails

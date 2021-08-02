@@ -13,7 +13,7 @@ Redmine::Plugin.register :redmica_s3 do
   author 'Far End Technologies Corporation'
   author_url 'https://www.farend.co.jp'
 
-  version '1.0.8'
+  version '1.0.9'
   requires_redmine version_or_higher: '4.1.0'
 
   Rails.configuration.to_prepare do
