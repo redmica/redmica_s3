@@ -22,7 +22,20 @@ module RedmicaS3
       end
 
       def get_image_filename(attrname)
-        Redmine::Export::PDF::RDMPdfEncoding.attach(@attachments, attrname, 'UTF-8')
+        atta = Redmine::Export::PDF::RDMPdfEncoding.attach(@attachments, attrname, 'UTF-8')
+        if atta
+          atta
+        elsif %r{/attachments/download/(?<id>[^/]+)/} =~ attrname and
+              atta = @attachments.find{|a| a.id.to_s == id} and
+              atta.readable? and atta.visible?
+          atta
+        elsif %r{/attachments/thumbnail/(?<id>[^/]+)/(?<size>\d+)} =~ attrname and
+              atta = @attachments.find{|a| a.id.to_s == id} and
+              atta.readable? and atta.visible?
+          atta.thumbnail(size: size)
+        else
+          nil
+        end
       end
 
       protected
@@ -148,6 +161,8 @@ module RedmicaS3
       tmpFile.binmode
       if image_uri.is_a?(Attachment)
         tmpFile.write(image_uri.raw_data)
+      elsif image_uri.is_a?(Array)  # thumbnail
+        tmpFile.write(image_uri.last)
       else
         open(image_uri, 'rb') do |read_file|
           tmpFile.write(read_file.read)
@@ -162,7 +177,7 @@ module RedmicaS3
     def proc_image_file(src, &block)
       tmpFile = nil
       img_file =
-        if src.is_a?(Attachment) || /^http/.match?(src)
+        if src.is_a?(Attachment) || src.is_a?(Array) || /^http/.match?(src)
           tmpFile = get_image_file(src)
           tmpFile.path
         else
