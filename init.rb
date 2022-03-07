@@ -15,7 +15,7 @@ Redmine::Plugin.register :redmica_s3 do
   author 'Far End Technologies Corporation'
   author_url 'https://www.farend.co.jp'
 
-  version '1.0.11'
+  version '1.0.12'
   requires_redmine version_or_higher: '4.1.0'
 
   Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)

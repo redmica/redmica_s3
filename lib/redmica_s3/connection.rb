@@ -111,7 +111,10 @@ module RedmicaS3
 
       def load_options
         file = ERB.new( File.read(File.join(Rails.root, 'config', 's3.yml')) ).result
-        YAML::load( file )[Rails.env].each do |key, value|
+        # YAML.load works as YAML.safe_load if Psych >= 4.0 is installed
+        (
+          YAML.respond_to?(:unsafe_load) ? YAML.unsafe_load(file) : YAML.load(file)
+        )[Rails.env].each do |key, value|
           @@s3_options[key.to_sym] = value
         end
       end
