@@ -101,11 +101,8 @@ module RedmicaS3
           access_key_id:      @@s3_options[:access_key_id],
           secret_access_key:  @@s3_options[:secret_access_key]
         }
-        if endpoint.present?
-          options[:endpoint] = endpoint
-        elsif region.present?
-          options[:region] = region
-        end
+        options[:endpoint] = endpoint
+        options[:region] = region
         @@conn = Aws::S3::Resource.new(options)
       end
 
