@@ -5,16 +5,7 @@ Aws.config[:ssl_verify_peer] = false
 module RedmicaS3
   module Connection
     @@conn = nil
-    @@s3_options = {
-      access_key_id:      nil,
-      secret_access_key:  nil,
-      bucket:             nil,
-      folder:             '',
-      endpoint:           nil,
-      thumb_folder:       'tmp',
-      import_folder:      'tmp',
-      region:             nil,
-    }
+    @@s3_options = {}
 
     class << self
       def folder
@@ -105,6 +96,7 @@ module RedmicaS3
       end
 
       def load_options
+        return if @@s3_options.present?
         file = ERB.new( File.read(File.join(Rails.root, 'config', 's3.yml')) ).result
         # YAML.load works as YAML.safe_load if Psych >= 4.0 is installed
         (
