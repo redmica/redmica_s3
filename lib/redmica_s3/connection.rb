@@ -9,8 +9,7 @@ module RedmicaS3
 
     class << self
       def folder
-        load_options
-        str = @@s3_options[:folder]
+        str = s3_options[:folder]
         (
           if str.present?
             /\S+\/\z/.match?(str) ? str : "#{str}/"
@@ -21,8 +20,7 @@ module RedmicaS3
       end
 
       def thumb_folder
-        load_options
-        str = @@s3_options[:thumb_folder]
+        str = s3_options[:thumb_folder]
         (
           if str.present?
             /\S+\/\z/.match?(str) ? str : "#{str}/"
@@ -33,8 +31,7 @@ module RedmicaS3
       end
 
       def import_folder
-        load_options
-        str = @@s3_options[:import_folder]
+        str = s3_options[:import_folder]
         (
           if str.present?
             /\S+\/\z/.match?(str) ? str : "#{str}/"
@@ -85,10 +82,9 @@ module RedmicaS3
 # private
 
       def establish_connection
-        load_options
         options = {
-          access_key_id:      @@s3_options[:access_key_id],
-          secret_access_key:  @@s3_options[:secret_access_key]
+          access_key_id:      s3_options[:access_key_id],
+          secret_access_key:  s3_options[:secret_access_key]
         }
         if endpoint.present?
           options[:endpoint] = endpoint
@@ -122,18 +118,15 @@ module RedmicaS3
       end
 
       def bucket
-        load_options
-        @@s3_options[:bucket]
+        s3_options[:bucket]
       end
 
       def endpoint
-        load_options
-        @@s3_options[:endpoint]
+        s3_options[:endpoint]
       end
 
       def region
-        load_options
-        @@s3_options[:region]
+        s3_options[:region]
       end
     end
 
