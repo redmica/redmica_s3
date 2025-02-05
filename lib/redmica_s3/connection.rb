@@ -99,7 +99,6 @@ module RedmicaS3
       end
 
       def load_options
-        return if @@s3_options.present?
         file = ERB.new( File.read(File.join(Rails.root, 'config', 's3.yml')) ).result
         # YAML.load works as YAML.safe_load if Psych >= 4.0 is installed
         (
@@ -107,6 +106,11 @@ module RedmicaS3
         )[Rails.env].each do |key, value|
           @@s3_options[key.to_sym] = value
         end
+      end
+
+      def s3_options
+        load_options if @@s3_options.blank?
+        @@s3_options
       end
 
       def conn
@@ -133,6 +137,6 @@ module RedmicaS3
       end
     end
 
-    private_class_method  :establish_connection, :load_options, :conn, :own_bucket, :bucket, :endpoint, :region
+    private_class_method  :establish_connection, :load_options, :s3_options, :conn, :own_bucket, :bucket, :endpoint, :region
   end
 end
