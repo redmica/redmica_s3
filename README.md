@@ -1,5 +1,7 @@
 # S3 plugin for Redmine/RedMica
 
+[![Test](https://github.com/redmica/redmica_s3/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/redmica/redmica_s3/actions/workflows/test.yml)
+
 ## Description
 This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem. This is a fork for [original gem](http://github.com/tigrish/redmine_s3) and difference is that this one supports [RedMica](https://github.com/redmica/redmica) 3.1.0 and later(compatible with Redmine 6.0.0 and later)
 
@@ -25,6 +27,39 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 ## Forked From
 * https://github.com/tigrish/redmine_s3
 * https://github.com/ka8725/redmine_s3
+
+## Development with Docker
+
+### Prerequisites
+
+* Docker
+
+### Launching Redmine
+
+```
+cd docker/
+docker compose up -d app
+docker compose exec app bin/rails s
+```
+
+If you want to run Redmine in production mode, you can use the following command:
+
+```
+docker compose exec app bin/rails s -e production
+```
+
+Visit http://localhost:3000 to access Redmine.
+
+### Running Tests
+
+```
+cd docker/
+docker compose up -d --wait
+docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
+```
+
+> [!Note]
+> You also need to have the selenium service running to exexute tests.
 
 ## License
 This plugin is released under the [MIT License](http://www.opensource.org/licenses/MIT).

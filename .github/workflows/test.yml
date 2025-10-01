@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'dev*'
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        redmica_version:
+          - 'master'
+          - 'stable-3.2'
+
+    steps:
+    - name: Checkout plugin
+      uses: actions/checkout@v5
+
+    - name: Build Docker image
+      run: docker compose build --build-arg REDMICA=${{ matrix.redmica_version }}
+      working-directory: docker
+
+    - name: Launch Docker containers
+      run: docker compose up -d --wait
+      working-directory: docker
+
+    - name: Run tests
+      run: docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
+      working-directory: docker
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        path: tmp/screenshots

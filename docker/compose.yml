@@ -1,0 +1,76 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        REDMICA: master
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
+    tty: true
+    environment:
+      AWS_REGION: ap-northeast-1
+      AWS_ENDPOINT_URL: https://s3.localhost.localstack.cloud:4566
+      CAPYBARA_SERVER_HOST: app
+      CAPYBARA_SERVER_PORT: 8080
+      SELENIUM_REMOTE_URL: http://selenium:4444/wd/hub
+      GOOGLE_CHROME_OPTS_ARGS: headless,disable-gpu,no-sandbox,disable-dev-shm-usage
+    volumes:
+      - ..:/redmica/plugins/redmica_s3
+      - ../tmp/screenshots:/redmica/tmp/screenshots
+      - bundle_cache:/usr/local/bundle
+    healthcheck:
+      test: bin/rails db:migrate:status
+      interval: 10s
+      timeout: 5s
+      start_period: 1m
+      retries: 10
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: |
+        pg_isready -U postgres
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  s3:
+    image: localstack/localstack:s3-latest
+    environment:
+      SERVICES: s3
+      DEBUG: ${DEBUG:-0}
+    ports:
+      - '127.0.0.1:4566:4566'
+      - '127.0.0.1:4510-4559:4510-4559'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      default:
+        aliases:
+          - 's3.localhost.localstack.cloud'
+          - 'redmine-bucket.s3.localhost.localstack.cloud'
+    healthcheck:
+      test: |
+        curl -s localhost:4566/_localstack/init/ready | grep '"completed": true'
+      interval: 5s
+      timeout: 5s
+      start_period: 1m
+      retries: 5
+
+  selenium:
+    image: selenium/standalone-chrome:136.0
+    platform: linux/amd64
+
+volumes:
+  bundle_cache:
+  postgres_data:
