@@ -43,8 +43,8 @@ module RedmicaS3
       visit "/boards/1/topics/#{topic.id}"
       assert_text topic.subject
 
-      accept_confirm { find('.attachments a.delete', match: :first).click }
-      assert_no_selector '.attachments'
+      accept_confirm { find('.attachments:not(.journal) a.delete', match: :first).click }
+      assert_no_selector '.attachments:not(.journal)'
 
       topic.reload
 
