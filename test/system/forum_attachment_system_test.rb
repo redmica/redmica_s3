@@ -85,7 +85,6 @@ module RedmicaS3
       assert_text 'First post'
 
       accept_confirm { find("#message-#{reply.id} .attachments a.delete", match: :first).click }
-
       assert_no_selector "#message-#{reply.id} .attachments"
 
       reply.reload
