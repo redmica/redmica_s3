@@ -1,3 +1,5 @@
+require 'aws-sdk-s3'
+
 module RedmicaS3
   module UtilsPatch
     extend ActiveSupport::Concern
@@ -31,7 +33,13 @@ module RedmicaS3
                 yield buffer if block_given?
               end
             end
-            object.upload_stream(&block)
+            # Use different upload methods based on aws-sdk-s3 version
+            if Gem::Specification.find_by_name('aws-sdk-s3').version >= Gem::Version.new('1.197.0')
+              tm = Aws::S3::TransferManager.new(client: object.client)
+              tm.upload_stream(bucket: object.bucket_name, key: object.key, &block)
+            else
+              object.upload_stream(&block)
+            end
           else
             object.write(upload)
             yield upload if block_given?
