@@ -1,5 +1,6 @@
 require_relative '../../../test/test_helper'
 require_relative '../../../test/application_system_test_case'
+require 'rack/test'
 
 class ApplicationSystemTestCase
   self.file_fixture_path = File.join(Redmine::Plugin.find('redmica_s3').directory, 'test', 'fixtures', 'files')
@@ -28,6 +29,14 @@ class ApplicationSystemTestCase
     false
   end
 
+  def count_s3_attachment_objects
+    count_s3_objects - count_s3_thumbnail_objects
+  end
+
+  def count_s3_thumbnail_objects
+    count_s3_objects(prefix: 'attachments/thumbnails')
+  end
+
   def count_s3_objects(prefix: nil)
     resp = s3_client.list_objects_v2(bucket: 'redmine-bucket', prefix: prefix)
     resp.key_count
@@ -41,5 +50,18 @@ class ApplicationSystemTestCase
       access_key_id: 'test',
       secret_access_key: 'test'
     )
+  end
+
+  def uploaded_file_from_fixture(name)
+    path = file_fixture(name)
+    mime_type =
+      case File.extname(name)
+      when '.txt' then 'text/plain'
+      when '.png' then 'image/png'
+      when '.pdf' then 'application/pdf'
+      else 'application/octet-stream'
+      end
+
+    Rack::Test::UploadedFile.new(path, mime_type)
   end
 end
