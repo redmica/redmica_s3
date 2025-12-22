@@ -1,5 +1,4 @@
 require_relative '../test_helper'
-require 'securerandom'
 
 module RedmicaS3
   class WikiAttachmentSystemTest < ApplicationSystemTestCase
@@ -29,7 +28,6 @@ module RedmicaS3
       wiki_page = Project.find(1).wiki.pages.find_by!(title: new_page)
 
       assert_equal 1, wiki_page.attachments.size
-      assert_equal 1, count_s3_attachment_objects
       assert_equal 1, count_s3_attachment_objects
       assert verify_attachment_stored_in_s3(wiki_page.attachments.first)
     end
