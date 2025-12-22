@@ -29,6 +29,7 @@ module RedmicaS3
 
       assert_equal 1, wiki_page.attachments.size
       assert_equal 1, count_s3_attachment_objects
+      assert_equal 1, count_s3_thumbnail_objects
       assert verify_attachment_stored_in_s3(wiki_page.attachments.first)
     end
 
