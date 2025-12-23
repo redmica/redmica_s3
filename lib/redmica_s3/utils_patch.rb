@@ -1,3 +1,5 @@
+require 'aws-sdk-s3'
+
 module RedmicaS3
   module UtilsPatch
     extend ActiveSupport::Concern
@@ -23,7 +25,8 @@ module RedmicaS3
           Encoding.default_internal = Encoding::ASCII_8BIT
           object = RedmicaS3::Connection.object(path, nil)
           if upload.respond_to?(:read)
-            object.upload_stream do |write_stream|
+            tm = Aws::S3::TransferManager.new(client: object.client)
+            tm.upload_stream(bucket: object.bucket_name, key: object.key) do |write_stream|
               buffer = ""
               while (buffer = upload.read(8192))
                 write_stream << buffer.b
