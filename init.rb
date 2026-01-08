@@ -16,7 +16,7 @@ Redmine::Plugin.register :redmica_s3 do
   author_url 'https://www.farend.co.jp'
 
   version '3.0.0'
-  requires_redmine version_or_higher: '6.0.0'
+  requires_redmine version_or_higher: '6.1.1'
 
   Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
   Redmine::Utils.__send__(:include, RedmicaS3::UtilsPatch)
