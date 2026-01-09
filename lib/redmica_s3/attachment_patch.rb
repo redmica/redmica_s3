@@ -29,7 +29,7 @@ module RedmicaS3
         def disk_filename(filename, directory=nil)
           timestamp = DateTime.now.strftime("%y%m%d%H%M%S")
           ascii = ''
-          if %r{^[a-zA-Z0-9_\.\-]*$}.match?(filename) && filename.length <= 50
+          if %r{^[a-zA-Z0-9_.-]*$}.match?(filename) && filename.length <= 50
             ascii = filename
           else
             ascii = ActiveSupport::Digest.hexdigest(filename)
