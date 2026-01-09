@@ -152,6 +152,7 @@ module RedmicaS3
 
         diskfile_s3  = diskfile
         begin
+          # TODO: Stop passing the deprecated is_pdf flag in Redmine 7.0
           Redmine::Thumbnail.generate(diskfile_s3, target, size, is_pdf?)
         rescue => e
           Rails.logger.error(
