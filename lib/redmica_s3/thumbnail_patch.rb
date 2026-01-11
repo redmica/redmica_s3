@@ -39,14 +39,17 @@ module RedmicaS3
             raw_data = RedmicaS3::Connection.object(source).reload.get.body.read rescue nil
             mime_type = Marcel::MimeType.for(raw_data)
             return nil unless Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
-            return nil if mime_type == 'application/pdf' && !gs_available?
 
             size_option = "#{size}x#{size}>"
             begin
               extname_source = File.extname(source)
               tempfile = MiniMagick::Utilities.tempfile(extname_source) do |f| f.write(raw_data) end
-              output_tempfile = MiniMagick::Utilities.tempfile(mime_type == 'application/pdf' ? ".png" : extname_source)
               in_filepath = tempfile.path
+              if mime_type == 'application/pdf'
+                return nil unless gs_available?
+                return nil unless valid_pdf_magic?(in_filepath)
+              end
+              output_tempfile = MiniMagick::Utilities.tempfile(mime_type == 'application/pdf' ? ".png" : extname_source)
               out_filepath = output_tempfile.path
               # Generate command
               convert =
