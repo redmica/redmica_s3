@@ -27,9 +27,9 @@ module RedmicaS3
 
       module ClassMethods
         # Generates a thumbnail for the source image to target
-        def generate(source, target, size, is_pdf = false)
+        # TODO: Remove the deprecated _is_pdf parameter in Redmine 7.0
+        def generate(source, target, size, _is_pdf = nil)
           return nil unless convert_available?
-          return nil if is_pdf && !gs_available?
 
           target_folder = RedmicaS3::Connection.thumb_folder
           object = RedmicaS3::Connection.object(target, target_folder)
@@ -39,14 +39,17 @@ module RedmicaS3
             raw_data = RedmicaS3::Connection.object(source).reload.get.body.read rescue nil
             mime_type = Marcel::MimeType.for(raw_data)
             return nil unless Redmine::Thumbnail::ALLOWED_TYPES.include? mime_type
-            return nil if is_pdf && mime_type != "application/pdf"
 
             size_option = "#{size}x#{size}>"
             begin
               extname_source = File.extname(source)
               tempfile = MiniMagick::Utilities.tempfile(extname_source) do |f| f.write(raw_data) end
-              output_tempfile = MiniMagick::Utilities.tempfile(is_pdf ? ".png" : extname_source)
               in_filepath = tempfile.path
+              if mime_type == 'application/pdf'
+                return nil unless gs_available?
+                return nil unless valid_pdf_magic?(in_filepath)
+              end
+              output_tempfile = MiniMagick::Utilities.tempfile(mime_type == 'application/pdf' ? ".png" : extname_source)
               out_filepath = output_tempfile.path
               # Generate command
               convert =
@@ -55,7 +58,7 @@ module RedmicaS3
                 else
                   MiniMagick.convert
                 end
-              if is_pdf
+              if mime_type == 'application/pdf'
                 convert << "#{in_filepath}[0]"
                 convert.thumbnail size_option
                 convert << "png:#{out_filepath}"

@@ -17,7 +17,8 @@ module RedmicaS3
       attach_file 'attachments[dummy][file]', [
         file_fixture('text.txt'),
         file_fixture('png.png'),
-        file_fixture('pdf.pdf')
+        file_fixture('pdf.pdf'),
+        file_fixture('with_pdf_magic.ps.pdf')
       ]
 
       click_button 'commit'
@@ -28,6 +29,7 @@ module RedmicaS3
         assert_text 'text.txt'
         assert_text 'png.png'
         assert_text 'pdf.pdf'
+        assert_text 'with_pdf_magic.ps.pdf'
       end
 
       within '.thumbnails' do
@@ -47,8 +49,8 @@ module RedmicaS3
 
       issue = Issue.order(:id).last
 
-      assert_equal 3, issue.attachments.size
-      assert_equal 3, count_s3_attachment_objects
+      assert_equal 4, issue.attachments.size
+      assert_equal 4, count_s3_attachment_objects
       assert_equal 2, count_s3_thumbnail_objects
 
       issue.attachments.each do |attachment|

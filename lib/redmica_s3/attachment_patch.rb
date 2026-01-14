@@ -29,7 +29,7 @@ module RedmicaS3
         def disk_filename(filename, directory=nil)
           timestamp = DateTime.now.strftime("%y%m%d%H%M%S")
           ascii = ''
-          if %r{^[a-zA-Z0-9_\.\-]*$}.match?(filename) && filename.length <= 50
+          if %r{^[a-zA-Z0-9_.-]*$}.match?(filename) && filename.length <= 50
             ascii = filename
           else
             ascii = ActiveSupport::Digest.hexdigest(filename)
@@ -152,6 +152,7 @@ module RedmicaS3
 
         diskfile_s3  = diskfile
         begin
+          # TODO: Stop passing the deprecated is_pdf flag in Redmine 7.0
           Redmine::Thumbnail.generate(diskfile_s3, target, size, is_pdf?)
         rescue => e
           Rails.logger.error(
