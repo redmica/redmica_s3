@@ -46,7 +46,6 @@ class ApplicationSystemTestCase
     @s3_client ||= Aws::S3::Client.new(
       endpoint: ENV['AWS_ENDPOINT_URL'],
       region: ENV['AWS_REGION'],
-      force_path_style: true,
       access_key_id: 'test',
       secret_access_key: 'test'
     )
