@@ -104,6 +104,33 @@ module RedmicaS3
       assert_equal 0, count_s3_attachment_objects
     end
 
+    test 'should preview pdf file on attachment display page' do
+      # 1. Setup: Create an issue with a PDF attachment
+      issue = create_issue_with_attachments('pdf.pdf')
+      assert_equal 1, issue.attachments.size
+      attachment = issue.attachments.first
+
+      # 2. Action: Visit issue page and navigate to the attachment link
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('pdf.pdf', href: attachment_path(attachment))
+        click_link 'pdf.pdf', match: :first
+      end
+
+      # 3. Verify: Check the full view link and PDF preview object
+      path = download_named_attachment_path(attachment, attachment.filename)
+
+      # Ensure the "Open in full view" link is present
+      assert has_link?('Open in full view', href: path)
+
+      # Verify the PDF is embedded correctly using the object tag
+      within '.filecontent.pdf' do
+        assert_selector "object[type='application/pdf'][data='#{path}']"
+      end
+    end
+
     private
 
     def create_issue_with_attachments(*filenames)
