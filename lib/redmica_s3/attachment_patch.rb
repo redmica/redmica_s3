@@ -1,3 +1,4 @@
+require "tempfile"
 require "zip"
 
 module RedmicaS3
@@ -54,6 +55,14 @@ module RedmicaS3
         # Deletes all thumbnails
         def clear_thumbnails
           Redmine::Thumbnail.batch_delete!
+        end
+
+        def clear_markdownized_previews
+          prefix = RedmicaS3::Connection.markdownized_preview_folder
+
+          bucket = RedmicaS3::Connection.__send__(:own_bucket)
+          bucket.objects(prefix: prefix).batch_delete!
+          return
         end
 
         def archive_attachments(attachments)
@@ -251,10 +260,62 @@ module RedmicaS3
         Redmine::Thumbnail.batch_delete!(
           thumbnail_path('*').sub(/\*\.thumb$/, '')
         )
+
+        RedmicaS3::Connection.delete(
+          markdownized_preview_cache_path,
+          RedmicaS3::Connection.markdownized_preview_folder
+        )
       end
 
       def thumbnail_path(size)
         Pathname.new(super).relative_path_from(Pathname.new(self.class.thumbnails_storage_path)).to_s
+      end
+
+      public
+
+      def markdownized_preview_content
+        return nil unless markdownized_previewable?
+
+        target = markdownized_preview_cache_path
+        object = markdownized_preview_object(false)
+        return object.get.body.read if object.exists?
+
+        source = Tempfile.new([digest, File.extname(filename)])
+        preview = Tempfile.new([digest, '.md'])
+        preview_path = preview.path
+        preview.close!
+
+        begin
+          source.binmode
+          source.write(raw_data)
+          source.flush
+
+          if Redmine::Markdownizer.convert(source.path, preview_path)
+            markdown = File.binread(preview_path)
+            RedmicaS3::Connection.put(
+              target,
+              File.basename(target),
+              markdown,
+              'text/markdown',
+              target_folder: RedmicaS3::Connection.markdownized_preview_folder,
+              digest: Digest::SHA256.hexdigest(markdown)
+            )
+            markdown
+          end
+        ensure
+          source.close!
+          File.delete(preview_path) if File.exist?(preview_path)
+        end
+      rescue => e
+        Rails.logger.error(
+          "An error occured while generating markdownized preview for #{diskfile} " \
+            "to #{target}\nException was: #{e.message}"
+        )
+        nil
+      end
+
+      def markdownized_preview_cache_path
+        "#{digest}_#{filesize}.md"
       end
     end
 
@@ -266,6 +327,15 @@ module RedmicaS3
 
     def s3_object(reload = true)
       object = RedmicaS3::Connection.object(diskfile)
+      object.reload if reload && !object.data_loaded?
+      object
+    end
+
+    def markdownized_preview_object(reload = true)
+      object = RedmicaS3::Connection.object(
+        markdownized_preview_cache_path,
+        RedmicaS3::Connection.markdownized_preview_folder
+      )
       object.reload if reload && !object.data_loaded?
       object
     end
