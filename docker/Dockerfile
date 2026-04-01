@@ -10,6 +10,11 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends -qq \
     libyaml-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN set -eux; \
+    curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.9.0.2/pandoc-3.9.0.2-1-arm64.deb; \
+    dpkg -i /tmp/pandoc.deb; \
+    rm -f /tmp/pandoc.deb
+
 RUN sed -ri 's/(rights)="none" (pattern="PDF")/\1="read" \2/' /etc/ImageMagick-6/policy.xml
 
 WORKDIR /redmica
