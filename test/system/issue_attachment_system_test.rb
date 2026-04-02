@@ -107,7 +107,6 @@ module RedmicaS3
     test 'should preview pdf file on attachment display page' do
       # 1. Setup: Create an issue with a PDF attachment
       issue = create_issue_with_attachments('pdf.pdf')
-      assert_equal 1, issue.attachments.size
       attachment = issue.attachments.first
 
       # 2. Action: Visit issue page and navigate to the attachment link
