@@ -56,6 +56,10 @@ module RedmicaS3
           Redmine::Thumbnail.batch_delete!
         end
 
+        def clear_markdownized_previews
+          Redmine::Markdownizer.batch_delete!
+        end
+
         def archive_attachments(attachments)
           attachments = attachments.select(&:readable?)
           return nil if attachments.blank?
@@ -163,6 +167,20 @@ module RedmicaS3
         end
       end
 
+      def markdownized_preview_content
+        return nil unless markdownized_previewable?
+
+        diskfile_s3  = diskfile
+        target = markdownized_preview_cache_path
+        Redmine::Markdownizer.convert(diskfile_s3, target)
+      rescue => e
+        Rails.logger.error(
+          "An error occured while generating markdownized preview for #{diskfile_s3} " \
+            "to #{target}\nException was: #{e.message}"
+        )
+        nil
+      end
+
       # Returns true if the file is readable
       def readable?
         disk_filename.present? && self.s3_object(false).exists?
@@ -251,10 +269,18 @@ module RedmicaS3
         Redmine::Thumbnail.batch_delete!(
           thumbnail_path('*').sub(/\*\.thumb$/, '')
         )
+
+        Redmine::Markdownizer.batch_delete!(
+          markdownized_preview_cache_path.sub(/\*\.md$/, '')
+        )
       end
 
       def thumbnail_path(size)
         Pathname.new(super).relative_path_from(Pathname.new(self.class.thumbnails_storage_path)).to_s
+      end
+
+      def markdownized_preview_cache_path
+        Pathname.new(super).relative_path_from(Pathname.new(self.class.markdownized_previews_storage_path)).to_s
       end
     end
 
