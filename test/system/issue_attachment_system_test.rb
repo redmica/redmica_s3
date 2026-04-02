@@ -105,11 +105,9 @@ module RedmicaS3
     end
 
     test 'should preview pdf file on attachment display page' do
-      # 1. Setup: Create an issue with a PDF attachment
       issue = create_issue_with_attachments('pdf.pdf')
       attachment = issue.attachments.first
 
-      # 2. Action: Visit issue page and navigate to the attachment link
       visit "/issues/#{issue.id}"
 
       assert_selector 'h3', text: issue.subject
@@ -118,13 +116,8 @@ module RedmicaS3
         click_link 'pdf.pdf', match: :first
       end
 
-      # 3. Verify: Check the full view link and PDF preview object
       path = download_named_attachment_path(attachment, attachment.filename)
-
-      # Ensure the "Open in full view" link is present
       assert has_link?('Open in full view', href: path)
-
-      # Verify the PDF is embedded correctly using the object tag
       within '.filecontent.pdf' do
         assert_selector "object[type='application/pdf'][data='#{path}']"
       end
