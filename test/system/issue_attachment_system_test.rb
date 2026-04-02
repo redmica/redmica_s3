@@ -104,6 +104,25 @@ module RedmicaS3
       assert_equal 0, count_s3_attachment_objects
     end
 
+    test 'should preview pdf file on attachment display page' do
+      issue = create_issue_with_attachments('pdf.pdf')
+      attachment = issue.attachments.first
+
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('pdf.pdf', href: attachment_path(attachment))
+        click_link 'pdf.pdf', match: :first
+      end
+
+      path = download_named_attachment_path(attachment, attachment.filename)
+      assert has_link?('Open in full view', href: path)
+      within '.filecontent.pdf' do
+        assert_selector "object[type='application/pdf'][data='#{path}']"
+      end
+    end
+
     private
 
     def create_issue_with_attachments(*filenames)
