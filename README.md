@@ -23,6 +23,7 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 * region: string aws region (activate when endpoint is not set)
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
 * import_folder: string folder where import files are stored temporarily; defaults to 'tmp'
+* markdownized_previews_folder: string folder where markdown files for preview are stored temporarily; defaults to 'tmp'
 
 ## Forked From
 * https://github.com/tigrish/redmine_s3
