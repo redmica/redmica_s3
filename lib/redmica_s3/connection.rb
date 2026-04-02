@@ -41,6 +41,17 @@ module RedmicaS3
         ).presence
       end
 
+      def markdownized_previews_folder
+        str = s3_options[:markdownized_previews_folder]
+        (
+          if str.present?
+            /\S+\/\z/.match?(str) ? str : "#{str}/"
+          else
+            'tmp/'
+          end
+        ).presence
+      end
+
       def put(disk_filename, original_filename, data, content_type = 'application/octet-stream', opt = {})
         target_folder = opt[:target_folder] || self.folder
         digest = opt[:digest].presence
