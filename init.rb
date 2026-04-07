@@ -4,6 +4,7 @@ curr_dirname = File.dirname(__FILE__)
   attachment_patch import_patch
   pdf_patch thumbnail_patch utils_patch
   connection
+  markdownizer_patch
 ).each do |require_file|
   require File.join(curr_dirname, 'lib', 'redmica_s3', require_file)
 end
@@ -18,6 +19,7 @@ Redmine::Plugin.register :redmica_s3 do
   version '3.1.0'
   requires_redmine version_or_higher: '6.1.1'
 
+  Redmine::Markdownizer.__send__(:include, RedmicaS3::MarkdownizerPatch)
   Redmine::Thumbnail.__send__(:include, RedmicaS3::ThumbnailPatch)
   Redmine::Utils.__send__(:include, RedmicaS3::UtilsPatch)
   Attachment.__send__(:include, RedmicaS3::AttachmentPatch)
