@@ -42,7 +42,7 @@ module RedmicaS3
               return nil
             end
 
-            in_temp = Tempfile.new('source-object')
+            in_temp = Tempfile.new(['source-object', File.extname(source)])
             in_temp.write(source_obj.get.body.read)
             in_temp.flush
             out_temp = Tempfile.new('markdownized-preview')
