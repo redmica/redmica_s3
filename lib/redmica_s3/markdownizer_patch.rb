@@ -61,7 +61,7 @@ module RedmicaS3
 
               preview = File.binread(out_temp.path, Redmine::Markdownizer::MAX_OUTPUT_SIZE + 1) || +""
               preview_blob = preview.byteslice(0, Redmine::Markdownizer::MAX_OUTPUT_SIZE)
-              mime_type = Marcel::MimeType.for(preview_blob)
+              mime_type = Marcel::Magic.by_path(target).type
 
               RedmicaS3::Connection.put(target, File.basename(target), preview_blob, mime_type,
                 {target_folder: target_folder}
