@@ -37,7 +37,7 @@ module RedmicaS3
             return nil unless source_obj.exists?
 
             source_size = source_obj.size
-            if source_size > MAX_SOURCE_SIZE
+            if source_size > Redmine::Markdownizer::MAX_SOURCE_SIZE
               Rails.logger.warn("Markdownized preview generation skipped because source file is too large (#{source_size} bytes): #{source}")
               return nil
             end
@@ -47,10 +47,10 @@ module RedmicaS3
             in_temp.flush
             out_temp = Tempfile.new('markdownized-preview')
 
-            args = [COMMAND, in_temp.path, "-t", "gfm"]
+            args = [Redmine::Markdownizer::COMMAND, in_temp.path, "-t", "gfm"]
             pid = nil
             begin
-              Timeout.timeout(PREVIEW_GENERATION_TIMEOUT) do
+              Timeout.timeout(Redmine::Markdownizer::PREVIEW_GENERATION_TIMEOUT) do
                 pid = Process.spawn(*args, out: out_temp.path)
                 _, status = Process.wait2(pid)
                 unless status.success?
@@ -59,8 +59,8 @@ module RedmicaS3
                 end
               end
 
-              preview = File.binread(out_temp.path, MAX_OUTPUT_SIZE + 1) || +""
-              preview_blob = preview.byteslice(0, MAX_OUTPUT_SIZE)
+              preview = File.binread(out_temp.path, Redmine::Markdownizer::MAX_OUTPUT_SIZE + 1) || +""
+              preview_blob = preview.byteslice(0, Redmine::Markdownizer::MAX_OUTPUT_SIZE)
               mime_type = Marcel::MimeType.for(preview_blob)
 
               RedmicaS3::Connection.put(target, File.basename(target), preview_blob, mime_type,
