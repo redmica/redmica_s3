@@ -170,13 +170,46 @@ module RedmicaS3
       def markdownized_preview_content
         return nil unless markdownized_previewable?
 
-        diskfile_s3  = diskfile
-        target = markdownized_preview_cache_path
-        Redmine::Markdownizer.convert(diskfile_s3, target)
+        target_folder = RedmicaS3::Connection.markdownized_previews_folder
+        target_path = markdownized_preview_cache_path
+
+        target_obj = RedmicaS3::Connection.object(target_path, target_folder)
+        return target_obj.get.body.read if target_obj.exists?
+
+        source_obj = self.s3_object
+        source_size = source_obj.size
+        if source_size > Redmine::Markdownizer::MAX_SOURCE_SIZE
+          Rails.logger.warn("Markdownized preview generation skipped because source file is too large (#{source_size} bytes): #{source}")
+          return nil
+        end
+
+        source_temp = Tempfile.new(['source-object', File.extname(diskfile)], binmode: true)
+        source_temp.write(source_obj.get.body.read)
+        source_temp.flush
+        target_temp = Tempfile.new('markdownized-preview')
+        target_temp_path = target_temp.path
+        target_temp.close!
+
+        begin
+          if Redmine::Markdownizer.convert(source_temp.path, target_temp_path)
+            preview_blob = File.binread(target_temp_path)
+            RedmicaS3::Connection.put(
+              target_path,
+              File.basename(target_path),
+              preview_blob,
+              Marcel::Magic.by_path(target_path).type,
+              target_folder: target_folder
+            )
+            preview_blob
+          end
+        ensure
+          source_temp.close!
+          File.delete(target_temp_path) if File.exist?(target_temp_path)
+        end
       rescue => e
         Rails.logger.error(
-          "An error occured while generating markdownized preview for #{diskfile_s3} " \
-            "to #{target}\nException was: #{e.message}"
+          "An error occured while generating markdownized preview for #{diskfile} " \
+            "to #{target_path}\nException was: #{e.message}"
         )
         nil
       end
