@@ -183,10 +183,12 @@ module RedmicaS3
           return nil
         end
 
-        source_temp = Tempfile.new(['source-object', File.extname(diskfile)], binmode: true)
+        source_extname = File.extname(diskfile)
+        source_temp = Tempfile.new([File.basename(diskfile, source_extname), source_extname], binmode: true)
         source_temp.write(source_obj.get.body.read)
         source_temp.flush
-        target_temp = Tempfile.new('markdownized-preview')
+        target_extname = File.extname(target_path)
+        target_temp = Tempfile.new([File.basename(target_path, target_extname), target_extname])
         target_temp_path = target_temp.path
         target_temp.close!
 
