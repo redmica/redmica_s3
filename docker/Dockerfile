@@ -13,7 +13,12 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends -qq \
 RUN sed -ri 's/(rights)="none" (pattern="PDF")/\1="read" \2/' /etc/ImageMagick-6/policy.xml
 
 RUN set -eux \
-    && curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.9.0.2/pandoc-3.9.0.2-1-arm64.deb \
+    && dpkg_arch="$(dpkg --print-architecture)" \
+    && case "${dpkg_arch}" in \
+         "amd64" | "arm64") ;; \
+         *) echo "Unsupported architecture for pandoc release asset: ${dpkg_arch}" >&2; exit 1 ;; \
+       esac \
+    && curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.9.0.2/pandoc-3.9.0.2-1-${dpkg_arch}.deb \
     && dpkg -i /tmp/pandoc.deb \
     && rm /tmp/pandoc.deb
 
