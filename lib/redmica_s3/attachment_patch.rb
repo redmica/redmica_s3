@@ -179,7 +179,7 @@ module RedmicaS3
         source_obj = self.s3_object
         source_size = source_obj.size
         if source_size > Redmine::Markdownizer::MAX_SOURCE_SIZE
-          Rails.logger.warn("Markdownized preview generation skipped because source file is too large (#{source_size} bytes): #{source}")
+          Rails.logger.warn("Markdownized preview generation skipped because source file is too large (#{source_size} bytes): #{diskfile}")
           return nil
         end
 
