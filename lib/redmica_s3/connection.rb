@@ -47,7 +47,7 @@ module RedmicaS3
           if str.present?
             /\S+\/\z/.match?(str) ? str : "#{str}/"
           else
-            'tmp/'
+            'tmp/markdownized_previews/'
           end
         ).presence
       end
