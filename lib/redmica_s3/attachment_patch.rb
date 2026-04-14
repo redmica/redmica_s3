@@ -183,6 +183,9 @@ module RedmicaS3
           return nil
         end
 
+        # The source file (S3 object) is saved to a temporary file,
+        # converted to markdown by pandoc (using Redmine::Markdownizer.convert),
+        # and then saved to S3.
         source_extname = File.extname(diskfile)
         source_temp = Tempfile.new([File.basename(diskfile, source_extname), source_extname], binmode: true)
         source_temp.write(source_obj.get.body.read)
