@@ -42,14 +42,7 @@ module RedmicaS3
       end
 
       def markdownized_previews_folder
-        str = s3_options[:markdownized_previews_folder]
-        (
-          if str.present?
-            /\S+\/\z/.match?(str) ? str : "#{str}/"
-          else
-            'tmp/markdownized_previews/'
-          end
-        ).presence
+        "#{folder}markdownized_previews/"
       end
 
       def put(disk_filename, original_filename, data, content_type = 'application/octet-stream', opt = {})
