@@ -41,6 +41,10 @@ module RedmicaS3
         ).presence
       end
 
+      def markdownized_previews_folder
+        "#{folder}markdownized_previews/"
+      end
+
       def put(disk_filename, original_filename, data, content_type = 'application/octet-stream', opt = {})
         target_folder = opt[:target_folder] || self.folder
         digest = opt[:digest].presence

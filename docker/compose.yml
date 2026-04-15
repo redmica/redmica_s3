@@ -67,8 +67,7 @@ services:
       retries: 5
 
   selenium:
-    image: selenium/standalone-chrome:136.0
-    platform: linux/amd64
+    image: selenium/standalone-chromium:136.0
 
 volumes:
   bundle_cache:

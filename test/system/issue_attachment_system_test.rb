@@ -123,6 +123,66 @@ module RedmicaS3
       end
     end
 
+    test 'should preview docx file on attachment display page' do
+      issue = create_issue_with_attachments('docx.docx')
+      attachment = issue.attachments.first
+
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('docx.docx', href: attachment_path(attachment))
+        click_link 'docx.docx', match: :first
+      end
+
+      assert_selector '.filecontent.wiki', text: /This is a docx file\./
+    end
+
+    test 'should preview odt file on attachment display page' do
+      issue = create_issue_with_attachments('odt.odt')
+      attachment = issue.attachments.first
+
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('odt.odt', href: attachment_path(attachment))
+        click_link 'odt.odt', match: :first
+      end
+
+      assert_selector '.filecontent.wiki', text: /This is an odt file\./
+    end
+
+    test 'should preview pptx file on attachment display page' do
+      issue = create_issue_with_attachments('pptx.pptx')
+      attachment = issue.attachments.first
+
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('pptx.pptx', href: attachment_path(attachment))
+        click_link 'pptx.pptx', match: :first
+      end
+
+      assert_selector '.filecontent.wiki', text: /This is a pptx file\./
+    end
+
+    test 'should preview xlsx file on attachment display page' do
+      issue = create_issue_with_attachments('xlsx.xlsx')
+      attachment = issue.attachments.first
+
+      visit "/issues/#{issue.id}"
+
+      assert_selector 'h3', text: issue.subject
+      within '.attachments' do
+        assert has_link?('xlsx.xlsx', href: attachment_path(attachment))
+        click_link 'xlsx.xlsx', match: :first
+      end
+
+      assert_selector '.filecontent.wiki', text: /This is a xlsx file\./
+    end
+
     private
 
     def create_issue_with_attachments(*filenames)
