@@ -32,7 +32,6 @@ default: &default
   folder: attachments
   thumb_folder: attachments/thumbnails/
   import_folder: attachments/imports/
-  markdownized_previews_folder: attachments/markdownized_previews/
 
 development:
   <<: *default
