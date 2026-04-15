@@ -6,7 +6,6 @@ production:
   endpoint:
   thumb_folder:
   import_folder:
-  markdownized_previews_folder:
   region:
 
 development:
@@ -17,7 +16,6 @@ development:
   endpoint:
   thumb_folder:
   import_folder:
-  markdownized_previews_folder:
   region:
 
 # Uncomment this to run plugin tests with standart redmine script
