@@ -136,6 +136,8 @@ module RedmicaS3
       end
 
       assert_selector '.filecontent.wiki', text: /This is a docx file\./
+      assert_equal 1, count_s3_markdownized_preview_objects
+      assert verify_markdownized_preview_stored_in_s3(attachment)
     end
 
     test 'should preview odt file on attachment display page' do
