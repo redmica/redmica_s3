@@ -16,7 +16,7 @@ Redmine::Plugin.register :redmica_s3 do
   author 'Far End Technologies Corporation'
   author_url 'https://www.farend.co.jp'
 
-  version '3.1.0'
+  version '4.0.0'
   requires_redmine version_or_higher: '6.1.1'
 
   Redmine::Markdownizer.__send__(:include, RedmicaS3::MarkdownizerPatch)
