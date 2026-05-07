@@ -76,9 +76,11 @@ docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
 
 The `master` branch is used for development, and the `stable` branch is used for releases.
 
-1. Ensure all tests pass on `master`
-2. Merge `master` into `stable`
-3. Ensure all tests pass on `stable`, then create a release on `stable`
+1. Bump the version in `init.rb`
+2. Ensure all tests pass on `master`
+3. Merge `master` into `stable`
+4. Ensure all tests pass on `stable`
+5. Create a tag on `stable`, then create a release from that tag
 
 ## License
 This plugin is released under the [MIT License](http://www.opensource.org/licenses/MIT).
