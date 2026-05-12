@@ -22,6 +22,13 @@ class ApplicationSystemTestCase
     verify_file_stored_in_s3(attachment.diskfile, 'attachments')
   end
 
+  def verify_markdownized_preview_stored_in_s3(attachment)
+    verify_file_stored_in_s3(
+      attachment.send(:markdownized_preview_cache_path),
+      RedmicaS3::Connection.markdownized_previews_folder
+    )
+  end
+
   def verify_file_stored_in_s3(filename, folder)
     key = File.join(folder, filename)
     s3_client.head_object(bucket: 'redmine-bucket', key: key)
@@ -30,11 +37,15 @@ class ApplicationSystemTestCase
   end
 
   def count_s3_attachment_objects
-    count_s3_objects - count_s3_thumbnail_objects
+    count_s3_objects - count_s3_thumbnail_objects - count_s3_markdownized_preview_objects
   end
 
   def count_s3_thumbnail_objects
     count_s3_objects(prefix: 'attachments/thumbnails')
+  end
+
+  def count_s3_markdownized_preview_objects
+    count_s3_objects(prefix: RedmicaS3::Connection.markdownized_previews_folder)
   end
 
   def count_s3_objects(prefix: nil)

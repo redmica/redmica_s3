@@ -3,11 +3,25 @@
 [![Test](https://github.com/redmica/redmica_s3/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/redmica/redmica_s3/actions/workflows/test.yml)
 
 ## Description
-This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem. This is a fork for [original gem](http://github.com/tigrish/redmine_s3) and difference is that this one supports [RedMica](https://github.com/redmica/redmica) 4.0.2 or later(compatible with Redmine 6.1.1 or later)
+This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem.
+
+## Supported Versions
+
+| Version | RedMica | Redmine |
+| ------- | ------- | ------- |
+| v4.0.0 or later | v4.1 or later | trunk |
+| v3.2.0 | v4.0 | v6.1 |
 
 ## Installation
+
+> [!Note]
+> The `master` branch is a development branch and may include incompatible changes. Use a version tag for installation and updates.
+
 1. Make sure Redmine is installed and cd into it's root directory
-2. `git clone https://github.com/redmica/redmica_s3.git plugins/redmica_s3`
+2. Clone the latest release or a specific version tag:
+   ```
+   git clone -b <version-tag> https://github.com/redmica/redmica_s3.git plugins/redmica_s3
+   ```
 3. `cp plugins/redmica_s3/config/s3.yml.example config/s3.yml`
 4. Edit config/s3.yml with your favourite editor
 5. `bundle install --without development test` for installing this plugin dependencies (if you already did it, doing a `bundle install` again would do no harm)
@@ -64,6 +78,16 @@ docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
 
 > [!Note]
 > You also need to have the selenium service running to exexute tests.
+
+## Releasing
+
+The `master` branch is used for development, and the `stable` branch is used for releases.
+
+1. Bump the version in `init.rb`
+2. Ensure all tests pass on `master`
+3. Merge `master` into `stable`
+4. Ensure all tests pass on `stable`
+5. Create a tag on `stable`, then create a release from that tag
 
 ## License
 This plugin is released under the [MIT License](http://www.opensource.org/licenses/MIT).
