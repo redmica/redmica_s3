@@ -32,13 +32,13 @@ module RedmicaS3
                 User.current.preference.save
               end
               render action: 'diff'
-            elsif @attachment.is_text? && @attachment.filesize <= Setting.file_max_size_displayed.to_i.kilobyte
-              @content = @attachment.raw_data
-              render action: 'file'
             elsif @attachment.is_image?
               render action: 'image'
             elsif @attachment.is_pdf?
               render action: 'pdf'
+            elsif @attachment.is_text? && @attachment.filesize <= Setting.file_max_size_displayed.to_i.kilobyte
+              @content = @attachment.raw_data
+              render action: 'file'
             elsif @content = @attachment.markdownized_preview_content
               render action: 'markdownized'
             else
