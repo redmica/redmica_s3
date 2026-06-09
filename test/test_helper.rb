@@ -69,6 +69,7 @@ class ApplicationSystemTestCase
       when '.txt' then 'text/plain'
       when '.png' then 'image/png'
       when '.pdf' then 'application/pdf'
+      when '.svg' then 'image/svg+xml'
       else 'application/octet-stream'
       end
 

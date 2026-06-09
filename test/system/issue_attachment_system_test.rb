@@ -123,6 +123,15 @@ module RedmicaS3
       end
     end
 
+    test 'should preview svg file as image' do
+      attachment = create_issue_with_attachments('svg.svg').attachments.first
+
+      visit attachment_path(attachment)
+
+      path = download_named_attachment_path(attachment, attachment.filename)
+      assert_selector "img.filecontent[src='#{path}'][alt='svg.svg']"
+    end
+
     test 'should preview docx file on attachment display page' do
       issue = create_issue_with_attachments('docx.docx')
       attachment = issue.attachments.first
