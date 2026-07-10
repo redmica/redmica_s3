@@ -32,6 +32,10 @@ jobs:
       run: docker compose up -d --wait
       working-directory: docker
 
+    - name: Prepare test database
+      run: docker compose exec app bin/rails db:test:prepare
+      working-directory: docker
+
     - name: Run tests
       run: docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
       working-directory: docker
