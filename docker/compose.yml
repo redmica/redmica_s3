@@ -24,7 +24,7 @@ services:
       - ../tmp/screenshots:/redmica/tmp/screenshots
       - bundle_cache:/usr/local/bundle
     healthcheck:
-      # The entrypoint creates tmp/.ready once setup (bundle install and db:migrate) is complete.
+      # The entrypoint creates tmp/.ready once its setup steps are complete.
       test: test -f tmp/.ready
       interval: 10s
       start_period: 5m
