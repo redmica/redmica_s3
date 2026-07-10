@@ -24,11 +24,11 @@ services:
       - ../tmp/screenshots:/redmica/tmp/screenshots
       - bundle_cache:/usr/local/bundle
     healthcheck:
-      test: bin/rails db:migrate:status
+      # The entrypoint creates tmp/.ready once its setup steps are complete.
+      test: test -f tmp/.ready
       interval: 10s
-      timeout: 5s
-      start_period: 1m
-      retries: 10
+      start_period: 5m
+      retries: 5
 
   db:
     image: postgres:14
