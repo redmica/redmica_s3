@@ -3,6 +3,8 @@ set -e
 
 cd /redmica
 
+rm -f tmp/.ready
+
 cat > config/database.yml << EOF
 default: &default
   adapter: postgresql
@@ -47,5 +49,7 @@ bin/rails generate_secret_token
 bin/rails db:create db:migrate
 
 bin/rails r "RedmicaS3::Connection.send(:own_bucket).tap { |bucket| bucket.create unless bucket.exists? }"
+
+touch tmp/.ready
 
 exec "$@"
