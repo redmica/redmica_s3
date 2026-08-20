@@ -154,17 +154,47 @@ module RedmicaS3
         size = 100 unless size > 0
         target = thumbnail_path(size)
 
-        diskfile_s3  = diskfile
+        target_folder = RedmicaS3::Connection.thumb_folder
+        target_obj = RedmicaS3::Connection.object(target, target_folder)
+        if target_obj.exists?
+          return [target_obj.metadata['digest'], target_obj.get.body.read]
+        end
+
+        source_extname = File.extname(diskfile)
+        source_temp = Tempfile.new([File.basename(diskfile, source_extname), source_extname], binmode: true)
+        source_temp.write(raw_data)
+        source_temp.flush
+        target_extname = File.extname(target)
+        target_temp = Tempfile.new([File.basename(target, target_extname), target_extname])
+        target_temp_path = target_temp.path
+        target_temp.close!
+
         begin
           # TODO: Stop passing the deprecated is_pdf flag in Redmine 7.0
-          Redmine::Thumbnail.generate(diskfile_s3, target, size, is_pdf?)
-        rescue => e
-          Rails.logger.error(
-            "An error occured while generating thumbnail for #{diskfile_s3} " \
-              "to #{target}\nException was: #{e.message}"
-          )
-          nil
+          if Redmine::Thumbnail.generate(source_temp.path, target_temp_path, size, is_pdf?)
+            thumbnail_blob = File.binread(target_temp_path)
+            mime_type = Marcel::MimeType.for(thumbnail_blob)
+            digest = Digest::SHA256.hexdigest(thumbnail_blob)
+            RedmicaS3::Connection.put(
+              target,
+              File.basename(target),
+              thumbnail_blob,
+              mime_type,
+              target_folder: target_folder,
+              digest: digest
+            )
+            [digest, thumbnail_blob]
+          end
+        ensure
+          source_temp.close!
+          File.delete(target_temp_path) if File.exist?(target_temp_path)
         end
+      rescue => e
+        Rails.logger.error(
+          "An error occured while generating thumbnail for #{diskfile} " \
+            "to #{target}\nException was: #{e.message}"
+        )
+        nil
       end
 
       def markdownized_preview_content
