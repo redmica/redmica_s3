@@ -89,6 +89,12 @@ module RedmicaS3
 
       end
 
+      def reset_content_type
+        return unless readable?
+
+        self.content_type = Marcel::MimeType.for(s3_object.get.body, name: filename)
+      end
+
       # Copies the temporary file to its final location
       # and computes its hash
       def files_to_final_location
