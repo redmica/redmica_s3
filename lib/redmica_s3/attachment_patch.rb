@@ -98,43 +98,34 @@ module RedmicaS3
       # Copies the temporary file to its final location
       # and computes its hash
       def files_to_final_location
-        if @temp_file
-          self.disk_directory = target_directory
-          self.disk_filename = Attachment.disk_filename(filename, disk_directory)
-          Rails.logger.info("Saving attachment '#{self.diskfile}' (#{@temp_file.size} bytes)")
-          sha = Digest::SHA256.new
-          if @temp_file.respond_to?(:read)
-            buffer = ""
-            while (buffer = @temp_file.read(8192))
-              sha.update(buffer)
-            end
-          else
-            sha.update(@temp_file)
+        return unless @temp_file
+
+        self.disk_directory = target_directory
+        self.disk_filename = Attachment.disk_filename(filename, disk_directory)
+        Rails.logger.info("Saving attachment '#{self.diskfile}' (#{@temp_file.size} bytes)")
+
+        sha = Digest::SHA256.new
+        if @temp_file.respond_to?(:read)
+          buffer = ""
+          while (buffer = @temp_file.read(8192))
+            sha.update(buffer)
           end
-
-          self.digest = sha.hexdigest
-        end
-        if content_type.blank? && filename.present?
-          self.content_type = Redmine::MimeType.of(filename)
-        end
-        # Don't save the content type if it's longer than the authorized length
-        if self.content_type && self.content_type.length > 255
-          self.content_type = nil
+        else
+          sha.update(@temp_file)
         end
 
-        if @temp_file
-          raw_data =
-            if @temp_file.respond_to?(:read)
-              @temp_file.rewind
-              @temp_file.read
-            else
-              @temp_file
-            end
-          RedmicaS3::Connection.put(self.diskfile, self.filename, raw_data,
-             (self.content_type || 'application/octet-stream'),
-             {digest: self.digest}
-          )
-        end
+        self.digest = sha.hexdigest
+        raw_data =
+          if @temp_file.respond_to?(:read)
+            @temp_file.rewind
+            @temp_file.read
+          else
+            @temp_file
+          end
+        RedmicaS3::Connection.put(self.diskfile, self.filename, raw_data,
+           (self.content_type || 'application/octet-stream'),
+           {digest: self.digest}
+        )
       ensure
         @temp_file = nil
       end
