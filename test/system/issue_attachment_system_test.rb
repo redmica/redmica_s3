@@ -86,6 +86,32 @@ module RedmicaS3
       assert verify_attachment_stored_in_s3(added_attachment)
     end
 
+    test 'rename attachment and reset content type' do
+      issue = create_issue_with_attachments('test.bin')
+      attachment = issue.attachments.first
+
+      assert_equal 'application/octet-stream', attachment.content_type
+
+      visit "/issues/#{issue.id}"
+
+      within '.attachments' do
+        click_link 'Edit attached files'
+      end
+
+      within "#attachment-#{attachment.id}" do
+        find("#attachments_#{attachment.id}_filename").set('test.txt')
+      end
+      click_button 'Save'
+      assert_current_path "/issues/#{issue.id}"
+
+      attachment.reload
+      assert_equal 'test.txt', attachment.filename
+      assert_equal 'text/plain', attachment.content_type
+
+      visit attachment_path(attachment)
+      assert_text file_fixture('test.bin').read
+    end
+
     test 'remove attachments' do
       issue = create_issue_with_attachments('text.txt')
 

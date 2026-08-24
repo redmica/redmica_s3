@@ -18,7 +18,6 @@ jobs:
       matrix:
         redmica_version:
           - 'master'
-          - 'stable-4.1'
 
     steps:
     - name: Checkout plugin
