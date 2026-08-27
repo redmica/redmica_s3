@@ -10,10 +10,12 @@ module RedmicaS3
 
       attach_file 'file', file_fixture('issue_import.csv')
       click_button 'Next »'
-      assert_equal 1, count_s3_objects
 
       # Import options page
-      assert_selector '#import-form legend', text: 'Options'
+      find('#import-form legend', text: 'Options') do
+        assert_equal 1, count_s3_objects
+      end
+
       click_button 'Next »'
 
       # Import fields mapping page
