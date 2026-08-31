@@ -57,6 +57,8 @@ module RedmicaS3
         csv_options = {:headers => false}
         separator = settings['separator'].to_s
         csv_options[:col_sep] = separator if separator.size == 1
+        newline = settings['newline'].to_s
+        csv_options[:row_sep] = newline unless newline.empty?
         wrapper = settings['wrapper'].to_s
         csv_options[:quote_char] = wrapper if wrapper.size == 1
 

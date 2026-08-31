@@ -1,0 +1,3 @@
+plain_header,"quoted_header
+contains_LF",Tracker,Subject
+foo,bar,Bug,"CSV with CRLF and newline in quoted header"
