@@ -9,10 +9,6 @@ module RedmicaS3
       @request.session[:user_id] = 2
     end
 
-    def teardown
-      Import.destroy_all
-    end
-
     test 'issue import from csv with crlf and newline in quoted header' do
       import = new_record(Import) do
         post :create, params: {

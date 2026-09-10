@@ -5,7 +5,7 @@ require 'rack/test'
 ActiveSupport::TestCase.file_fixture_path =
   File.join(Redmine::Plugin.find('redmica_s3').directory, 'test', 'fixtures', 'files')
 
-class ApplicationSystemTestCase
+class ActiveSupport::TestCase
   setup do
     cleanup_s3_bucket
   end
@@ -18,7 +18,9 @@ class ApplicationSystemTestCase
   rescue => e
     Rails.logger.error "Error cleaning up S3 bucket: #{e.message}"
   end
+end
 
+class ApplicationSystemTestCase
   def verify_attachment_stored_in_s3(attachment)
     verify_file_stored_in_s3(attachment.diskfile, 'attachments')
   end
