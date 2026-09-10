@@ -2,10 +2,9 @@ require_relative '../../../test/test_helper'
 require_relative '../../../test/application_system_test_case'
 require 'rack/test'
 
-ActiveSupport::TestCase.file_fixture_path =
-  File.join(Redmine::Plugin.find('redmica_s3').directory, 'test', 'fixtures', 'files')
-
 class ActiveSupport::TestCase
+  self.file_fixture_path = File.join(Redmine::Plugin.find('redmica_s3').directory, 'test', 'fixtures', 'files')
+
   setup do
     cleanup_s3_bucket
   end
