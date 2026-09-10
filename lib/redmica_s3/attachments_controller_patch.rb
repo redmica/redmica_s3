@@ -34,7 +34,7 @@ module RedmicaS3
               render action: 'diff'
             elsif @attachment.is_image?
               render action: 'image'
-            elsif @attachment.is_pdf?
+            elsif @attachment.pdf_previewable?
               render action: 'pdf'
             elsif @attachment.is_text? && @attachment.filesize <= Setting.file_max_size_displayed.to_i.kilobyte
               @content = @attachment.raw_data
