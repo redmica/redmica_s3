@@ -1,4 +1,5 @@
-FROM ruby:3.4-slim-bookworm
+ARG RUBY_VERSION=3.4
+FROM ruby:${RUBY_VERSION}-slim-bookworm
 
 ARG REDMICA=master
 
