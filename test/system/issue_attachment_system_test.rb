@@ -142,7 +142,7 @@ module RedmicaS3
         click_link 'pdf.pdf', match: :first
       end
 
-      path = download_named_attachment_path(attachment, attachment.filename)
+      path = download_named_attachment_path(attachment, attachment.filename, disposition: 'inline')
       assert has_link?('Open in full view', href: path)
       within '.filecontent.pdf' do
         assert_selector "object[type='application/pdf'][data='#{path}']"
