@@ -4,6 +4,7 @@ services:
       context: .
       args:
         REDMICA: master
+        RUBY_VERSION: ${RUBY_VERSION:-3.4}
     ports:
       - '3000:3000'
     depends_on:

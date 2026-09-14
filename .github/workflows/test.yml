@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'master'
-      - 'dev*'
+      - 'dev/*'
   pull_request:
   workflow_dispatch:
   schedule:
@@ -21,11 +21,13 @@ jobs:
 
     steps:
     - name: Checkout plugin
-      uses: actions/checkout@v5
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Build Docker image
       run: docker compose build --build-arg REDMICA=${{ matrix.redmica_version }}
       working-directory: docker
+      env:
+        RUBY_VERSION: '4.0'
 
     - name: Launch Docker containers
       run: docker compose up -d --wait
@@ -35,7 +37,7 @@ jobs:
       run: docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
       working-directory: docker
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: failure()
       with:
         path: tmp/screenshots
