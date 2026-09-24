@@ -1,6 +1,6 @@
 # S3 plugin for Redmine/RedMica
 
-[![Test](https://github.com/redmica/redmica_s3/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/redmica/redmica_s3/actions/workflows/test.yml)
+[![Tests master](https://github.com/redmica/redmica_s3/actions/workflows/tests-master.yml/badge.svg?branch=master)](https://github.com/redmica/redmica_s3/actions/workflows/tests-master.yml)
 
 ## Description
 This [Redmine](http://www.redmine.org) plugin makes file attachments be stored on [Amazon S3](http://aws.amazon.com/s3) rather than on the local filesystem.
