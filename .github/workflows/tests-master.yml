@@ -1,0 +1,17 @@
+name: Tests master
+
+on:
+  push:
+    branches:
+      - "master"
+      - "dev/*"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  tests-master:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      redmica-version: "master"
+      ruby-version: "4.0"
