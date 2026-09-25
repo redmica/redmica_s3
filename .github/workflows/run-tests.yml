@@ -1,0 +1,47 @@
+name: Run tests
+
+on:
+  workflow_call:
+    inputs:
+      plugin-ref:
+        description: Git ref of the plugin to test
+        required: false
+        type: string
+      redmica-version:
+        description: Git ref of RedMica to test against
+        required: true
+        type: string
+      ruby-version:
+        description: Ruby version used by the test container
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.plugin-ref }}
+
+      - name: Build Docker image
+        run: docker compose build --build-arg REDMICA=${{ inputs.redmica-version }}
+        working-directory: docker
+        env:
+          RUBY_VERSION: ${{ inputs.ruby-version }}
+
+      - name: Launch Docker containers
+        run: docker compose up -d --wait
+        working-directory: docker
+
+      - name: Run tests
+        run: docker compose exec app bin/rails redmine:plugins:test NAME=redmica_s3
+        working-directory: docker
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: screenshots-${{ inputs.redmica-version }}
+          path: tmp/screenshots
