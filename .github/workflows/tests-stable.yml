@@ -1,0 +1,17 @@
+# Apply changes to this workflow to the stable branch as well.
+name: Tests stable
+
+on:
+  push:
+    branches:
+      - "stable"
+  pull_request:
+    branches:
+      - "stable"
+
+jobs:
+  tests-stable:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      redmica-version: "stable-4.1"
+      ruby-version: "3.4"

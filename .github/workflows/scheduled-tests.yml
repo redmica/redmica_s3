@@ -1,0 +1,22 @@
+# Apply changes to this workflow to the stable branch as well.
+name: Scheduled tests
+
+on:
+  schedule:
+    - cron: "0 23 * * 0-4" # 08:00 JST, Monday to Friday
+  workflow_dispatch:
+
+jobs:
+  tests-master:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      plugin-ref: "master"
+      redmica-version: "master"
+      ruby-version: "4.0"
+
+  tests-stable:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      plugin-ref: "stable"
+      redmica-version: "stable-4.1"
+      ruby-version: "3.4"
