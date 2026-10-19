@@ -167,8 +167,7 @@ module RedmicaS3
         target_temp.close!
 
         begin
-          # TODO: Stop passing the deprecated is_pdf flag in Redmine 7.0
-          if Redmine::Thumbnail.generate(source_temp.path, target_temp_path, size, is_pdf?)
+          if Redmine::Thumbnail.generate(source_temp.path, target_temp_path, size)
             thumbnail_blob = File.binread(target_temp_path)
             mime_type = Marcel::MimeType.for(thumbnail_blob)
             digest = Digest::SHA256.hexdigest(thumbnail_blob)
