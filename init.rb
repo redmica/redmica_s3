@@ -1,6 +1,7 @@
 curr_dirname = File.dirname(__FILE__)
 %w(
   attachments_controller_patch
+  avatars_controller_patch
   attachment_patch import_patch
   pdf_patch thumbnail_patch utils_patch
   connection
@@ -26,4 +27,5 @@ Redmine::Plugin.register :redmica_s3 do
   Redmine::Export::PDF::ITCPDF.__send__(:include, RedmicaS3::PdfPatch)
   Import.__send__(:include, RedmicaS3::ImportPatch)
   AttachmentsController.__send__(:include, RedmicaS3::AttachmentsControllerPatch)
+  AvatarsController.__send__(:include, RedmicaS3::AvatarsControllerPatch)
 end
