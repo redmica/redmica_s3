@@ -6,11 +6,7 @@ module RedmicaS3
       prepend PrependMethods
     end
 
-    class_methods do
-    end
-
     module PrependMethods
-
       def show
         # The original image is never served since it may contain metadata
         # such as the location where it was taken
@@ -29,6 +25,5 @@ module RedmicaS3
         end
       end
     end
-
   end
 end
