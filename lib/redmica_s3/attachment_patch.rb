@@ -149,7 +149,8 @@ module RedmicaS3
           size = Setting.thumbnails_size.to_i
         end
         size = 100 unless size > 0
-        target = thumbnail_path(size)
+        crop = !!options[:crop]
+        target = thumbnail_path(crop ? "#{size}_crop" : size)
 
         target_folder = RedmicaS3::Connection.thumb_folder
         target_obj = RedmicaS3::Connection.object(target, target_folder)
@@ -167,7 +168,7 @@ module RedmicaS3
         target_temp.close!
 
         begin
-          if Redmine::Thumbnail.generate(source_temp.path, target_temp_path, size)
+          if Redmine::Thumbnail.generate(source_temp.path, target_temp_path, size, crop: crop)
             thumbnail_blob = File.binread(target_temp_path)
             mime_type = Marcel::MimeType.for(thumbnail_blob)
             digest = Digest::SHA256.hexdigest(thumbnail_blob)
