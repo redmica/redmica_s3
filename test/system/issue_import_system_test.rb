@@ -14,9 +14,8 @@ module RedmicaS3
       click_button 'Next »'
 
       # Import options page
-      find('#import-form legend', text: 'Options') do
-        assert_equal 1, count_s3_objects
-      end
+      assert_selector '#import-form legend', text: 'Options'
+      assert_equal 1, count_s3_objects
 
       click_button 'Next »'
 
