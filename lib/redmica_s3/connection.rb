@@ -1,7 +1,5 @@
 require 'aws-sdk-s3'
 
-Aws.config[:ssl_verify_peer] = false
-
 module RedmicaS3
   module Connection
     @@conn = nil
