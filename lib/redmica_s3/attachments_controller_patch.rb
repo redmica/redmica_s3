@@ -55,9 +55,12 @@ module RedmicaS3
         end
 
         if stale?(etag: @attachment.digest, template: false)
+          # Send PDF compatible files, such as Illustrator files, as PDF so that
+          # browsers display them inline
+          is_inline_pdf = disposition(@attachment) == 'inline' && @attachment.pdf_previewable?
           send_data @attachment.raw_data,
             filename: filename_for_content_disposition(@attachment.filename),
-            type: detect_content_type(@attachment),
+            type: is_inline_pdf ? 'application/pdf' : detect_content_type(@attachment),
             disposition: disposition(@attachment)
         end
       end
