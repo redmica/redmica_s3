@@ -50,9 +50,11 @@ services:
     environment:
       FLOCI_BASE_URL: http://s3.localhost:4566
       FLOCI_STORAGE_MODE: memory
+      # Write S3 objects to /app/data/s3 so they can be inspected as files.
+      FLOCI_STORAGE_SERVICES_S3_MODE: persistent
     ports:
       - '127.0.0.1:4566:4566'
-    # Keep /app/data in memory. The image's entrypoint chowns it for the floci user.
+    # Keep /app/data on tmpfs. The image's entrypoint chowns it for the floci user.
     tmpfs:
       - /app/data
     networks:
