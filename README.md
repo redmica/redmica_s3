@@ -66,7 +66,7 @@ Visit http://localhost:3000 to access Redmine.
 
 > [!Note]
 > In the Docker development environment, [floci](https://github.com/floci-io/floci) is used as the S3 emulator.
-> S3 files are stored under `/app/data/s3` in the `s3` container.
+> S3 files are stored under `/app/data/s3/.accounts/000000000000/<bucket>/` in the `s3` container.
 
 ### Running Tests
 
