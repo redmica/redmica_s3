@@ -29,14 +29,57 @@ This [Redmine](http://www.redmine.org) plugin makes file attachments be stored o
 7. *Optional*: Run `rake redmica_s3:files_to_s3` to upload files in your files folder to s3
 
 ## Options Detail
-* access_key_id: string key (required)
-* secret_access_key: string key (required)
+* access_key_id: string key (optional; see [AWS Credentials](#aws-credentials))
+* secret_access_key: string key (optional; see [AWS Credentials](#aws-credentials))
+* session_token: string session token for temporary credentials (optional; used only with access_key_id and secret_access_key)
 * bucket: string bucket name (required)
 * folder: string folder name inside bucket (for example: 'attachments')
 * endpoint: string endpoint instead of s3.amazonaws.com
 * region: string aws region (activate when endpoint is not set)
 * thumb_folder: string folder where attachment thumbnails are stored; defaults to 'tmp'
 * import_folder: string folder where import files are stored temporarily; defaults to 'tmp'
+
+## AWS Credentials
+
+If both `access_key_id` and `secret_access_key` are set, the plugin uses them as static credentials.
+
+If both are left empty, the plugin passes no credentials to the AWS SDK, which resolves them through its [default credential provider chain](https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/credential-providers.html). This lets you use an IAM role instead of long-lived access keys, for example:
+
+* an EC2 instance profile
+* an ECS task role
+* IAM Roles for Service Accounts (IRSA) on EKS
+* `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment variables or a shared credentials file
+
+```yaml
+production:
+  access_key_id:
+  secret_access_key:
+  bucket: my-redmine-bucket
+  folder: attachments
+  region: ap-northeast-1
+```
+
+Setting only one of the two keys is a configuration error.
+
+The IAM role or user needs at least the following permissions on the bucket:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::my-redmine-bucket"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::my-redmine-bucket/*"
+    }
+  ]
+}
+```
 
 ## Forked From
 * https://github.com/tigrish/redmine_s3

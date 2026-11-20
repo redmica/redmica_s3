@@ -84,16 +84,39 @@ module RedmicaS3
 # private
 
       def establish_connection
-        options = {
-          access_key_id:      s3_options[:access_key_id],
-          secret_access_key:  s3_options[:secret_access_key]
-        }
+        options = credential_options
         if endpoint.present?
           options[:endpoint] = endpoint
         elsif region.present?
           options[:region] = region
         end
         @@conn = Aws::S3::Resource.new(options)
+      end
+
+      # Static credentials are used only when both keys are configured.
+      # When neither is set, no credentials are passed to the SDK, which then
+      # resolves them through its default provider chain (environment
+      # variables, shared credentials/config files, ECS task role, EKS IRSA,
+      # EC2 instance profile).
+      def credential_options
+        access_key_id = s3_options[:access_key_id].presence
+        secret_access_key = s3_options[:secret_access_key].presence
+
+        if access_key_id && secret_access_key
+          options = {
+            access_key_id:      access_key_id,
+            secret_access_key:  secret_access_key
+          }
+          session_token = s3_options[:session_token].presence
+          options[:session_token] = session_token if session_token
+          options
+        elsif access_key_id || secret_access_key
+          raise ArgumentError,
+                'config/s3.yml: set both access_key_id and secret_access_key, ' \
+                'or leave both empty to use the AWS SDK default credential provider chain'
+        else
+          {}
+        end
       end
 
       def load_options
@@ -132,6 +155,6 @@ module RedmicaS3
       end
     end
 
-    private_class_method  :establish_connection, :load_options, :s3_options, :conn, :own_bucket, :bucket, :endpoint, :region
+    private_class_method  :establish_connection, :credential_options, :load_options, :s3_options, :conn, :own_bucket, :bucket, :endpoint, :region
   end
 end
