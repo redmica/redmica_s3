@@ -1,3 +1,5 @@
+# Leave access_key_id and secret_access_key empty to use the AWS SDK default
+# credential provider chain (e.g. an EC2 instance profile or ECS task role).
 production:
   access_key_id:
   secret_access_key:
