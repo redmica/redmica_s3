@@ -46,25 +46,28 @@ services:
       retries: 5
 
   s3:
-    image: hectorvent/floci:1.0.4
+    image: floci/floci:2.5.0
     environment:
       FLOCI_BASE_URL: http://s3.localhost:4566
       FLOCI_STORAGE_MODE: memory
+      # Write S3 objects to /app/data/s3 so they can be inspected as files.
+      FLOCI_STORAGE_SERVICES_S3_MODE: persistent
     ports:
       - '127.0.0.1:4566:4566'
-    # Floci 1.0.4 runs as uid 1001, so make the tmpfs writable for that user.
+    # Keep /app/data on tmpfs. The image's entrypoint chowns it for the floci user.
     tmpfs:
-      - /app/data:uid=1001,gid=0,mode=0775
+      - /app/data
     networks:
       default:
         aliases:
           - 's3.localhost'
           - 'redmine-bucket.s3.localhost'
+    # The image has no curl, so use the healthcheck script it ships with.
     healthcheck:
-      test: curl -fsS --connect-timeout 1 http://localhost:4566/
+      test: /usr/local/bin/healthcheck.sh
       interval: 5s
-      timeout: 2s
-      start_period: 5s
+      timeout: 3s
+      start_period: 10s
       retries: 5
 
   selenium:
